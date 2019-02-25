@@ -78,9 +78,12 @@ function Invoke-Install {
     # Now install our built gems into the new Ruby folder structure that is under assembly.
     $gem_in_pkg_prefix = Resolve-Path "$pkg_prefix/bin/gem.cmd"
     Invoke-Expression -Command ("$gem_in_pkg_prefix install {0} --force --no-update-sources --local --no-document --conservative --no-env-shebang" -f "$HAB_CACHE_SRC_PATH/$pkg_dirname/*.gem")
+
+    # Copy libsodium-23.dll to the Ruby bin folder
+    $ruby_path_version = (ruby -e "puts RbConfig::CONFIG['ruby_version']")
+    Get-ChildItem $pkg_prefix/lib/ruby/gems/$ruby_path_version/gems/rbnacl-libsodium-* -Filter "libsodium-*.dll" -Recurse | Select-Object -First 1 | Copy-Item -Destination $pkg_prefix/bin/sodium.dll -Force
     
     # Cleanup some files that are no longer necessary before packaging
-    $ruby_path_version = (ruby -e "puts RbConfig::CONFIG['ruby_version']")
     Get-ChildItem $pkg_prefix/lib/ruby/gems/$ruby_path_version/gems -Filter "spec" -Recurse | Remove-Item -Recurse -Force
     Get-ChildItem $pkg_prefix/lib/ruby/gems/$ruby_path_version/cache -Recurse | Remove-Item -Recurse -Force
     Get-ChildItem $pkg_prefix -Filter "unins000.*" | Remove-Item -Recurse -Force
