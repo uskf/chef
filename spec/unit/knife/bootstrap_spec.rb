@@ -288,6 +288,7 @@ describe Chef::Knife::Bootstrap do
       end
 
       it "raises a Chef::Exceptions::BootstrapCommandInputError with the proper error message" do
+          # expect(LicenseAcceptance::Acceptor).to receive(:check_and_persist!)
         knife.parse_options(["-j", '{"foo":{"bar":"baz"}}'])
         knife.parse_options(["--json-attribute-file", jsonfile.path])
         knife.merge_configs
@@ -1786,12 +1787,16 @@ describe Chef::Knife::Bootstrap do
   end
 
   it "verifies that a server to bootstrap was given as a command line arg" do
+    # expect(LicenseAcceptance::Acceptor).to receive(:check_and_persist!)
     knife.name_args = nil
     expect { knife.run }.to raise_error(SystemExit)
     expect(stderr.string).to match(/ERROR:.+FQDN or ip/)
   end
 
   describe "#bootstrap_context" do
+    # before do
+      # expect(LicenseAcceptance::Acceptor).to receive(:check_and_persist!)
+    # end
     context "under Windows" do
       let(:base_os) { :windows }
       it "creates a WindowsBootstrapContext" do
