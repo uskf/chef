@@ -39,6 +39,10 @@ describe Chef::Knife::Bootstrap do
     k.merge_configs
     k
   end
+  
+  it "should fail because knife bootstrap work to accept remote EULA is not complete" do
+    expect(true).to eq(false)
+  end
 
   before do
     allow(target_host).to receive(:base_os).and_return base_os
