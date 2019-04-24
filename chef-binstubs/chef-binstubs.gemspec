@@ -21,6 +21,6 @@ Gem::Specification.new do |spec|
   spec.files = %w{Rakefile LICENSE} + Dir.glob("*.gemspec") +
     Dir.glob("{lib}/**/*", File::FNM_DOTMATCH).reject { |f| File.directory?(f) }
 
-  spec.bindir        = "bin"
-  spec.executables  = %w{ chef-apply chef-client chef-resource-inspector chef-service-manager chef-shell chef-solo chef-windows-service }
+  spec.bindir = "bin"
+  spec.executables = %w{ chef-apply chef-client chef-resource-inspector chef-service-manager chef-shell chef-solo chef-windows-service }
 end
