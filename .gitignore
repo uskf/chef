@@ -64,7 +64,7 @@ chef-config/.bundle
 chef-config/Gemfile.lock
 chef-config/pkg
 
-# chef-binstubs
-chef-binstubs/.bundle
-chef-binstubs/Gemfile.lock
-chef-binstubs/pkg
+# chef-bin
+chef-bin/.bundle
+chef-bin/Gemfile.lock
+chef-bin/pkg

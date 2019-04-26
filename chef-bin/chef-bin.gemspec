@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "chef-binstubs/version"
+require "chef-bin/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "chef-binstubs"
-  spec.version       = ChefBinstubs::VERSION
+  spec.name          = "chef-bin"
+  spec.version       = ChefBin::VERSION
   spec.authors       = ["Adam Jacob"]
   spec.email         = ["adam@chef.io"]
 
@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
 
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "chef", "= #{ChefBinstubs::VERSION}"
+  spec.add_dependency "chef", "= #{ChefBin::VERSION}"
   spec.add_development_dependency "rake"
 
   spec.files = %w{Rakefile LICENSE} + Dir.glob("*.gemspec") +

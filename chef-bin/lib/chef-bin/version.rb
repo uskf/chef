@@ -19,8 +19,8 @@
 # task instead.
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-module ChefBinstubs
-  CHEFBINSTUBS_ROOT = File.expand_path("../..", __FILE__)
+module ChefBin
+  CHEFBIN_ROOT = File.expand_path("../..", __FILE__)
   VERSION = "15.0.233".freeze
 end
 
