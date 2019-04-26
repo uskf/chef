@@ -38,7 +38,7 @@ Bundler::GemHelper.install_tasks name: gemspec
 task :install do
   chef_binstubs_path = ::File.join(::File.dirname(__FILE__), "chef-binstubs")
   Dir.chdir(chef_binstubs_path)
-  sh("rake install")
+  sh("rake install:force")
 end
 
 task :pedant, :chef_zero_spec
