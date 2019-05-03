@@ -6,13 +6,81 @@ Chef 15 release notes will be added here as development progresses.
 
 ## New Features / Functionality
 
-### Allow Using --delete-entire-chef-repo in Chef Local Mode
+### Chef Client is now Chef Infra Client
 
-### Data Collection Ground-Up Refactor
+Chef Client has a new name, but don't worry it's the same Chef Client you've grown used to. You'll notice new branding throughout the application, help, and docs but the command line name of chef-client remains the same.
+
+### Data Collection Ground-Up Rewrite
+
+### Knife Bootstrap Ground-Up Rewrite
+
+The `knife bootstrap` command has been rewritten from the ground up to utilize InSpec's Train transport technology for connecting to hosts. This gives us an improved bootstrap experience on *nix systems (Mac/AIX/Solaris/Linux) and also allows us to support bootstrapping of Windows hosts without the `knife-windows` gem. Using Train helped us to squash a good number of longstanding bugs including [CVE-2015-8559](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-8559): The `knife bootstrap` command in chef leaks the validator.pem private RSA key to /var/log/messages. We also took this as an opportunity to unify the command line experience between Windows and *nix hosts.
+
+With this change we have released removed the existing `knife bootstrap windows` command from the `knife-windows` gem in favor of our built-in support. We've also renamed many of the existing command line options to align on a single set of command line options for bootstrapping all operating systems. Using the legacy options will result in deprecation warnings, but `knife bootstrap` will accept those options with the exception of options listed as removed below.
+
+#### New Knife Bootstrap Flags
+
+| Flag | Description |
+|-----:|:------------|
+| --max-wait SECONDS | Maximum time to wait for initial connection to be established. |
+| --winrm-basic-auth-only | Perform only Basic Authentication to the target WinRM node. |
+| --connection-protocol PROTOCOL|Connection protocol to use. Valid values are 'winrm' and 'ssh'. Default is 'ssh'. |
+| --connection-user | user to authenticate as, regardless of protocol |
+| --connection-password| Password to authenticate as, regardless of protocol |
+| --connection-port | port to connect to, regardless of protocol |
+
+#### Changed Knife Bootstrap Flags
+
+| Flag | New Option | Notes |
+|-----:|:-----------|:------|
+| --[no-]host-key-verify |--[no-]ssh-verify-host-key| |
+| --forward-agent | --ssh-forward-agent| |
+| --session-timeout MINUTES | --session-timeout SECONDS|New for ssh, existing for winrm. The unit has changed from MINUTES to SECONDS for consistency with other timeouts.|
+| --ssh-password | --connection-password | |
+| --ssh-port | --connection-port | `knife[:ssh_port]` config setting remains available.
+| --ssh-user | --connection-user | `knife[:ssh_user]` config setting remains available.
+| --ssl-peer-fingerprint | --winrm-ssl-peer-fingerprint | |
+| --winrm-authentication-protocol=PROTO | --winrm-auth-method=AUTH-METHOD | Valid values: plaintext, kerberos, ssl, _negotiate_|
+| --winrm-password| --connection-password | |
+| --winrm-port| --connection-port | `knife[:winrm_port]` config setting remains available.|
+| --winrm-ssl-verify-mode MODE | --winrm-no-verify-cert | [1] Mode is not accepted. When flag is present, SSL cert will not be verified. Same as original mode of 'verify_none'. |
+| --winrm-transport TRANSPORT | --winrm-ssl | [1] Use this flag if the target host is accepts WinRM connections over SSL.
+| --winrm-user | --connection-user | `knife[:winrm_user]` config setting remains available.|
+
+1. These flags do not have an automatic mapping of old flag -> new flag. The
+   new flag must be used.
+
+#### Removed Flags
+
+| Flag | Notes |
+|-----:|:------|
+|--kerberos-keytab-file| This option existed but was not implemented.|
+|--winrm-codepage| This was used under knife-windows because bootstrapping was performed over a `cmd` shell. It is now invoked from `powershell`, so this option is no longer used.|
+|--winrm-shell|This option was ignored for bootstrap.|
+|--prerelease|Chef now releases all development builds to our current channel and does not perform pre-release gem releases.|
+|--install-as-service|Installing Chef client as a service is not supported|
+
+#### Additional Ways to Specify Protocol
+
+In addition to specifying protocol with `-o`, it's now possible to prefix the target hostname with the protocol in URL format. For example:
+
+```
+  knife bootstrap example.com -o ssh
+  knife bootstrap ssh://example.com
+  knife bootstrap example.com -o winrm
+  knife bootstrap winrm://example.com
+```
 
 ### copy_properties_from in Custom Resources
 
 ### ed25519 SSH key support
+
+Our underlying SSH implementation has been updated to support the new ed25519 SSH key format. This means you'll be able to use `knife bootstrap` and `knife ssh` on hosts that only support this new key format.
+
+### Allow Using --delete-entire-chef-repo in Chef Local Mode
+
+Chef Solo's `--delete-entire-chef-repo` option has been extended to work in Local Mode as well. Be warned that this flag does exactly what it states and when used incorrectly can result in loss of work.
+
 
 ## New Resources
 
@@ -77,74 +145,6 @@ The knife cookbook site command has been deprecated in favor of the knife superm
 The LC_ALL property in the locale resource has been deprecated as the usage of this environmental variable is not recommended by distribution maintainers.
 
 ## Breaking Changes
-
-### Knife Bootstrap
-
-Knife bootstrap has been updated, and Windows bootstrap has been merged into core Chef's `knife bootstrap`. This marks the deprecation of the `knife-windows` plugin's `bootstrap` behavior.
-This change also addresses [CVE-2015-8559](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-8559): The `knife bootstrap` command in chef leaks the validator.pem private RSA key to /var/log/messages.
-
-*Important*: `knife bootstrap` works with all supported versions of Chef client.  Older versions may continue to work as far back as 12.20
-
-In order to accomodate a combined bootstrap that supports both SSH and WinRM,
-CLI flags have been added, removed, or changed.  Using the changed options will
-result in deprecation warnings, but `knife bootstrap` will accept those options
-unless otherwise noted.
-
-Using removed options will cause the command to fail.
-
-#### New Flags
-
-| Flag | Description |
-|-----:|:------------|
-| --max-wait SECONDS | Maximum time to wait for initial connection to be established. |
-| --winrm-basic-auth-only | Perform only Basic Authentication to the target WinRM node. |
-| --connection-protocol PROTOCOL|Connection protocol to use. Valid values are 'winrm' and 'ssh'. Default is 'ssh'. |
-| --connection-user | user to authenticate as, regardless of protocol |
-| --connection-password| Password to authenticate as, regardless of protocol |
-| --connection-port | port to connect to, regardless of protocol |
-
-#### Changed Flags
-
-| Flag | New Option | Notes |
-|-----:|:-----------|:------|
-| --[no-]host-key-verify |--[no-]ssh-verify-host-key| |
-| --forward-agent | --ssh-forward-agent| |
-| --session-timeout MINUTES | --session-timeout SECONDS|New for ssh, existing for winrm. The unit has changed from MINUTES to SECONDS for consistency with other timeouts.|
-| --ssh-password | --connection-password | |
-| --ssh-port | --connection-port | `knife[:ssh_port]` config setting remains available.
-| --ssh-user | --connection-user | `knife[:ssh_user]` config setting remains available.
-| --ssl-peer-fingerprint | --winrm-ssl-peer-fingerprint | |
-| --winrm-authentication-protocol=PROTO | --winrm-auth-method=AUTH-METHOD | Valid values: plaintext, kerberos, ssl, _negotiate_|
-| --winrm-password| --connection-password | |
-| --winrm-port| --connection-port | `knife[:winrm_port]` config setting remains available.|
-| --winrm-ssl-verify-mode MODE | --winrm-no-verify-cert | [1] Mode is not accepted. When flag is present, SSL cert will not be verified. Same as original mode of 'verify_none'. |
-| --winrm-transport TRANSPORT | --winrm-ssl | [1] Use this flag if the target host is accepts WinRM connections over SSL.
-| --winrm-user | --connection-user | `knife[:winrm_user]` config setting remains available.|
-
-1. These flags do not have an automatic mapping of old flag -> new flag. The
-   new flag must be used.
-
-#### Removed Flags
-
-| Flag | Notes |
-|-----:|:------|
-|--kerberos-keytab-file| This option existed but was not implemented.|
-|--winrm-codepage| This was used under knife-windows because bootstrapping was performed over a `cmd` shell. It is now invoked from `powershell`, so this option is no longer used.|
-|--winrm-shell|This option was ignored for bootstrap.|
-|--prerelease|Chef now releases all development builds to our current channel and does not perform pre-release gem releases.|
-|--install-as-service|Installing Chef client as a service is not supported|
-
-#### Usage Changes
-
-Instead of specifying protocol with `-o`, it's also possible to prefix
-the target hostname with the protocol in URL format. For example:
-
-```
-  knife bootstrap example.com -o ssh
-  knife bootstrap ssh://example.com
-  knife bootstrap example.com -o winrm
-  knife bootstrap winrm://example.com
-```
 
 ### Audit Mode
 
