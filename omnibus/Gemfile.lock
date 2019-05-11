@@ -18,8 +18,8 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus-software
-  revision: 02869232bd219e8018f7d16b222a6af7403f0ad8
-  branch: master
+  revision: 91a66982034315ee8ba22d89db0ec50edbe0d788
+  branch: more_cleanup
   specs:
     omnibus-software (4.0.0)
       chef-sugar (>= 3.4.0)
