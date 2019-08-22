@@ -18,8 +18,8 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus-software
-  revision: 5fa35959f6efb0a5a745c46e4b0431a2826934da
-  branch: master
+  revision: fbde9da1ecea4ee43078e461d50de4867cf9301b
+  branch: csnapp/remove_libnsl
   specs:
     omnibus-software (4.0.0)
       chef-sugar (>= 3.4.0)
