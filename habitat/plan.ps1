@@ -7,11 +7,8 @@ $pkg_maintainer="The Chef Maintainers <humans@chef.io>"
 $pkg_license=@("Apache-2.0")
 $pkg_bin_dirs=@("bin")
 $pkg_deps=@(
-  "core/openssl"
   "core/cacerts"
-  "core/zlib"
   "robbkidd/ruby-plus-devkit/2.6.3"
-  #"robbkidd/ruby/2.6.4" # for experimenting with alternatively-built Ruby DELETE BEFORE MERGE
 )
 
 $project_root= (Resolve-Path "$PLAN_CONTEXT/../").Path
