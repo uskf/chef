@@ -77,7 +77,7 @@ function Invoke-After {
     Remove-Item $pkg_prefix/vendor/bundler -Recurse -Force
 
     # We don't need the gem docs.
-    Remove-Item $pkg_prefix/vendor/docs -Recurse -Force
+    Remove-Item $pkg_prefix/vendor/doc -Recurse -Force
     # We don't need to ship the test suites for every gem dependency.
     Get-ChildItem $pkg_prefix/vendor/gems -Filter "spec" -Directory -Recurse -Depth 1 | Remove-Item -Recurse -Force
 }
