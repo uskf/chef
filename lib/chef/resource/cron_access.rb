@@ -28,6 +28,25 @@ class Chef
 
       introduced "14.4"
       description "Use the cron_access resource to manage the /etc/cron.allow and /etc/cron.deny files."
+      examples <<~DOC
+        Add the mike user to cron.allow
+         ```ruby
+        cron_access 'mike'
+        ```
+         Add the mike user to cron.deny
+         ```ruby
+        cron_access 'mike' do
+          action :deny
+        end
+        ```
+         Specify the username with the user property
+         ```ruby
+        cron_access 'Deny the tomcat access to cron for security purposes' do
+          user 'jenkins'
+          action :deny
+        end
+        ```
+      DOC
 
       property :user, String,
         description: "An optional property to set the user name if it differs from the resource block's name.",

@@ -21,6 +21,21 @@ class Chef
 
       description "Use the chocolatey_source resource to add, remove, enable, or disable Chocolatey sources."
       introduced "14.3"
+      examples <<~DOC
+        Add a Chocolatey source
+         ```ruby
+        chocolatey_source 'MySource' do
+          source 'http://example.com/something'
+          action :add
+        end
+        ```
+         Remove a Chocolatey source
+         ```ruby
+        chocolatey_source 'MySource' do
+          action :remove
+        end
+        ```
+      DOC
 
       property :source_name, String, name_property: true,
                description: "An optional property to set the source name if it differs from the resource block's name."

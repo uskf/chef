@@ -24,6 +24,18 @@ class Chef
 
       description "Use the build_essential resource to install packages required for compiling C software from source."
       introduced "14.0"
+      examples <<~DOC
+        Install compilation packages
+         ```ruby
+        build_essential
+        ```
+         Install compilation packages during the compilation phase
+         ```ruby
+        build_essential 'Install compilation tools' do
+          compile_time true
+        end
+        ```
+      DOC
 
       # this allows us to use build_essential without setting a name
       property :name, String, default: ""
