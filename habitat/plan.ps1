@@ -55,7 +55,7 @@ function Invoke-Build {
 
 function Invoke-Install {
     Write-BuildLine "** Copy built & cached gems to install directory"
-    Copy-Item -Path "$HAB_CACHE_SRC_PATH/$pkg_dirname/*" -Destination $pkg_prefix -Recurse -Force
+    Copy-Item -Path "$HAB_CACHE_SRC_PATH/$pkg_dirname/*" -Destination $pkg_prefix -Recurse -Force -Exclude @("gem_make.out", "mkmf.log", "Makefile")
 
     try {
         Push-Location $pkg_prefix
@@ -64,6 +64,7 @@ function Invoke-Install {
             Write-BuildLine "** generating binstubs for $gem with precise version pins"
             Invoke-Expression -Command "appbundler.bat $project_root $pkg_prefix/bin $gem"
         }
+        Remove-StudioPathFrom -File $pkg_prefix/vendor/gems/chef-$pkg_version*/Gemfile
     } finally {
         Pop-Location
         # forget about the build bundle config
@@ -81,6 +82,18 @@ function Invoke-After {
 
     # We don't need the gem docs.
     Remove-Item $pkg_prefix/vendor/doc -Recurse -Force
-    # We don't need to ship the test suites for every gem dependency.
-    Get-ChildItem $pkg_prefix/vendor/gems -Filter "spec" -Directory -Recurse -Depth 1 | Remove-Item -Recurse -Force
+    # We don't need to ship the test suites for every gem dependency,
+    # only Chef's for package verification.
+    Get-ChildItem $pkg_prefix/vendor/gems -Filter "spec" -Directory -Recurse -Depth 1 `
+        | Where-Object -FilterScript { $_.FullName -notlike "*chef-15*" }             `
+        | Remove-Item -Recurse -Force
+}
+
+function Remove-StudioPathFrom {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [String]
+        $File
+    )
+    (Get-Content $File) -replace ($env:FS_ROOT -replace "\\","/"),"" | Set-Content $File
 }
