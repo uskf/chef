@@ -5,7 +5,10 @@ $pkg_upstream_url="https://github.com/chef/chef"
 $pkg_revision="1"
 $pkg_maintainer="The Chef Maintainers <humans@chef.io>"
 $pkg_license=@("Apache-2.0")
-$pkg_bin_dirs=@("bin")
+$pkg_bin_dirs=@(
+    "bin"
+    "vendor/bin"
+)
 $pkg_deps=@(
   "core/cacerts"
   "robbkidd/ruby-plus-devkit/2.6.3"
@@ -59,7 +62,7 @@ function Invoke-Install {
         bundle config --local gemfile $project_root/Gemfile
         foreach($gem in ("chef-bin", "chef", "ohai")) {
             Write-BuildLine "** generating binstubs for $gem with precise version pins"
-            Invoke-Expression -Command "vendor/bin/appbundler.bat $project_root $pkg_prefix/bin $gem"
+            Invoke-Expression -Command "appbundler.bat $project_root $pkg_prefix/bin $gem"
         }
     } finally {
         Pop-Location
