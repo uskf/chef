@@ -144,7 +144,7 @@ class Chef
       end
 
       def discover_repo_dir(dir)
-        %w{.chef cookbooks data_bags environments roles}.each do |subdir|
+        %W{#{Chef::Dist::USER_CONF_DIR} cookbooks data_bags environments roles}.each do |subdir|
           return dir if File.directory?(File.join(dir, subdir))
         end
         # If this isn't it, check the parent

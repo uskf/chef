@@ -1,3 +1,4 @@
+require "chef/dist"
 require "support/shared/integration/integration_helper"
 require "chef/mixin/shell_out"
 
@@ -6,7 +7,7 @@ describe "notifications" do
   include Chef::Mixin::ShellOut
 
   let(:chef_dir) { File.expand_path("../../../../bin", __FILE__) }
-  let(:chef_client) { "bundle exec chef-client --minimal-ohai" }
+  let(:chef_client) { "bundle exec #{Chef::Dist::CLIENT} --minimal-ohai" }
 
   when_the_repository "notifies a nameless resource" do
     before do

@@ -17,11 +17,12 @@
 
 require File.expand_path("../../spec_helper", __FILE__)
 require "chef/client"
+require "chef/dist"
 
 describe Chef::RunLock do
 
-  default_cache_path = windows? ? 'C:\chef' : "/var/chef"
-  default_pid_location = windows? ? 'C:\chef\cache\chef-client-running.pid' : "/var/chef/cache/chef-client-running.pid"
+  default_cache_path = windows? ? 'C:\\'+Chef::Dist::EXEC : "/var/#{Chef::Dist::EXEC}"
+  default_pid_location = windows? ? 'C:\\'+Chef::Dist::EXEC+'\cache\\'+Chef::Dist::CLIENT+'-running.pid' : "/var/#{Chef::Dist::EXEC}/cache/#{Chef::Dist::CLIENT}-running.pid"
 
   describe "when first created" do
     it "locates the lockfile in the file cache path by default" do
@@ -31,14 +32,14 @@ describe Chef::RunLock do
     end
 
     it "locates the lockfile in the user-configured path when set" do
-      Chef::Config.lockfile = "/tmp/chef-client-running.pid"
+      Chef::Config.lockfile = "/tmp/#{Chef::Dist::CLIENT}-running.pid"
       run_lock = Chef::RunLock.new(Chef::Config.lockfile)
-      expect(run_lock.runlock_file).to eq("/tmp/chef-client-running.pid")
+      expect(run_lock.runlock_file).to eq("/tmp/#{Chef::Dist::CLIENT}-running.pid")
     end
   end
 
   describe "acquire" do
-    let(:lockfile) { "/tmp/chef-client-running.pid" }
+    let(:lockfile) { "/tmp/#{Chef::Dist::CLIENT}-running.pid" }
     subject(:runlock) { Chef::RunLock.new(lockfile) }
 
     def stub_unblocked_run

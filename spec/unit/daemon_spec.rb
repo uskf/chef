@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "spec_helper"
 require "ostruct"
 
@@ -40,22 +41,22 @@ describe Chef::Daemon do
     describe "when the pid_file option has been set" do
 
       before do
-        Chef::Config[:pid_file] = "/var/run/chef/chef-client.pid"
+        Chef::Config[:pid_file] = "/var/run/chef/#{Chef::Dist::CLIENT}.pid"
       end
 
       it "should return the supplied value" do
-        expect(Chef::Daemon.pid_file).to eql("/var/run/chef/chef-client.pid")
+        expect(Chef::Daemon.pid_file).to eql("/var/run/chef/#{Chef::Dist::CLIENT}.pid")
       end
     end
 
     describe "without the pid_file option set" do
 
       before do
-        Chef::Daemon.name = "chef-client"
+        Chef::Daemon.name = Chef::Dist::CLIENT
       end
 
       it "should return a valued based on @name" do
-        expect(Chef::Daemon.pid_file).to eql("/tmp/chef-client.pid")
+        expect(Chef::Daemon.pid_file).to eql("/tmp/#{Chef::Dist::CLIENT}.pid")
       end
 
     end
@@ -64,11 +65,11 @@ describe Chef::Daemon do
   describe ".pid_from_file" do
 
     before do
-      Chef::Config[:pid_file] = "/var/run/chef/chef-client.pid"
+      Chef::Config[:pid_file] = "/var/run/chef/#{Chef::Dist::CLIENT}.pid"
     end
 
     it "should suck the pid out of pid_file" do
-      expect(File).to receive(:read).with("/var/run/chef/chef-client.pid").and_return("1337")
+      expect(File).to receive(:read).with("/var/run/chef/#{Chef::Dist::CLIENT}.pid").and_return("1337")
       Chef::Daemon.pid_from_file
     end
   end

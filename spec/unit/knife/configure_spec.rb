@@ -1,3 +1,4 @@
+require "chef/dist"
 require "spec_helper"
 
 describe Chef::Knife::Configure do
@@ -11,7 +12,7 @@ describe Chef::Knife::Configure do
 
     @out = StringIO.new
     allow(@knife.ui).to receive(:stdout).and_return(@out)
-    @knife.config[:config_file] = "/home/you/.chef/knife.rb"
+    @knife.config[:config_file] = "/home/you/#{Chef::Dist::USER_CONF_DIR}/knife.rb"
 
     @in = StringIO.new("\n" * 7)
     allow(@knife.ui).to receive(:stdin).and_return(@in)
@@ -31,10 +32,10 @@ describe Chef::Knife::Configure do
     o
   end
 
-  let(:default_admin_key) { "/etc/chef-server/admin.pem" }
+  let(:default_admin_key) { "#{Chef::Dist::SERVER_CONF_DIR}/admin.pem" }
   let(:default_admin_key_win32) { File.expand_path(default_admin_key) }
 
-  let(:default_validator_key) { "/etc/chef-server/chef-validator.pem" }
+  let(:default_validator_key) { "#{Chef::Dist::SERVER_CONF_DIR}/chef-validator.pem" }
   let(:default_validator_key_win32) { File.expand_path(default_validator_key) }
 
   let(:default_server_url) { "https://#{fqdn}/organizations/myorg" }
@@ -103,13 +104,13 @@ describe Chef::Knife::Configure do
 
   it "should not ask the user for the location of the existing admin key if -i and --admin_client_key are specified" do
     @knife.config[:initial] = true
-    @knife.config[:admin_client_key] = "/home/you/.chef/my-webui.pem"
+    @knife.config[:admin_client_key] = "/home/you/#{Chef::Dist::USER_CONF_DIR}/my-webui.pem"
     @knife.ask_user_for_config
     expect(@out.string).not_to match(Regexp.escape("Please enter the location of the existing admin client's private key:"))
     if windows?
-      expect(@knife.admin_client_key).to match %r{^[A-Za-z]:/home/you/\.chef/my-webui\.pem$}
+      expect(@knife.admin_client_key).to match %r{^[A-Za-z]:/home/you/#{Chef::Dist::USER_CONF_DIR}/my-webui\.pem$}
     else
-      expect(@knife.admin_client_key).to eq("/home/you/.chef/my-webui.pem")
+      expect(@knife.admin_client_key).to eq("/home/you/#{Chef::Dist::USER_CONF_DIR}/my-webui.pem")
     end
   end
 
@@ -128,7 +129,7 @@ describe Chef::Knife::Configure do
     @knife.config[:chef_server_url] = "http://localhost:5000"
     @knife.config[:node_name] = "testnode"
     @knife.config[:admin_client_name] = "my-webui"
-    @knife.config[:admin_client_key] = "/home/you/.chef/my-webui.pem"
+    @knife.config[:admin_client_key] = "/home/you/#{Chef::Dist::USER_CONF_DIR}/my-webui.pem"
     @knife.config[:client_key] = "/home/you/a-new-user.pem"
     allow(Etc).to receive(:getlogin).and_return("a-new-user")
 
@@ -139,33 +140,33 @@ describe Chef::Knife::Configure do
     expect(@knife.chef_server).to eq("http://localhost:5000")
     expect(@knife.admin_client_name).to eq("my-webui")
     if windows?
-      expect(@knife.admin_client_key).to match %r{^[A-Za-z]:/home/you/\.chef/my-webui\.pem$}
+      expect(@knife.admin_client_key).to match %r{^[A-Za-z]:/home/you/#{Chef::Dist::USER_CONF_DIR}/my-webui\.pem$}
       expect(@knife.new_client_key).to match %r{^[A-Za-z]:/home/you/a-new-user\.pem$}
     else
-      expect(@knife.admin_client_key).to eq("/home/you/.chef/my-webui.pem")
+      expect(@knife.admin_client_key).to eq("/home/you/#{Chef::Dist::USER_CONF_DIR}/my-webui.pem")
       expect(@knife.new_client_key).to eq("/home/you/a-new-user.pem")
     end
   end
 
   it "writes the new data to a config file" do
-    allow(Chef::Util::PathHelper).to receive(:home).with(".chef").and_return("/home/you/.chef")
-    allow(File).to receive(:expand_path).with("/home/you/.chef/credentials").and_return("/home/you/.chef/credentials")
-    allow(File).to receive(:expand_path).with("/home/you/.chef/#{Etc.getlogin}.pem").and_return("/home/you/.chef/#{Etc.getlogin}.pem")
+    allow(Chef::Util::PathHelper).to receive(:home).with(Chef::Dist::USER_CONF_DIR).and_return("/home/you/#{Chef::Dist::USER_CONF_DIR}")
+    allow(File).to receive(:expand_path).with("/home/you/#{Chef::Dist::USER_CONF_DIR}/credentials").and_return("/home/you/#{Chef::Dist::USER_CONF_DIR}/credentials")
+    allow(File).to receive(:expand_path).with("/home/you/#{Chef::Dist::USER_CONF_DIR}/#{Etc.getlogin}.pem").and_return("/home/you/#{Chef::Dist::USER_CONF_DIR}/#{Etc.getlogin}.pem")
     allow(File).to receive(:expand_path).with(default_admin_key).and_return(default_admin_key)
-    expect(FileUtils).to receive(:mkdir_p).with("/home/you/.chef")
+    expect(FileUtils).to receive(:mkdir_p).with("/home/you/#{Chef::Dist::USER_CONF_DIR}")
     config_file = StringIO.new
-    expect(::File).to receive(:open).with("/home/you/.chef/credentials", "w").and_yield config_file
+    expect(::File).to receive(:open).with("/home/you/#{Chef::Dist::USER_CONF_DIR}/credentials", "w").and_yield config_file
     @knife.config[:repository] = "/home/you/chef-repo"
     @knife.run
     expect(config_file.string).to match(/^client_name[\s]+=[\s]+'#{Etc.getlogin}'$/)
-    expect(config_file.string).to match(%r{^client_key[\s]+=[\s]+'/home/you/.chef/#{Etc.getlogin}.pem'$})
+    expect(config_file.string).to match(%r{^client_key[\s]+=[\s]+'/home/you/#{Chef::Dist::USER_CONF_DIR}/#{Etc.getlogin}.pem'$})
     expect(config_file.string).to match(/^chef_server_url\s+=[\s]+'#{default_server_url}'$/)
   end
 
   it "creates a new client when given the --initial option" do
-    allow(Chef::Util::PathHelper).to receive(:home).with(".chef").and_return("/home/you/.chef")
-    expect(File).to receive(:expand_path).with("/home/you/.chef/credentials").and_return("/home/you/.chef/credentials")
-    expect(File).to receive(:expand_path).with("/home/you/.chef/a-new-user.pem").and_return("/home/you/.chef/a-new-user.pem")
+    allow(Chef::Util::PathHelper).to receive(:home).with(Chef::Dist::USER_CONF_DIR).and_return("/home/you/#{Chef::Dist::USER_CONF_DIR}")
+    expect(File).to receive(:expand_path).with("/home/you/#{Chef::Dist::USER_CONF_DIR}/credentials").and_return("/home/you/#{Chef::Dist::USER_CONF_DIR}/credentials")
+    expect(File).to receive(:expand_path).with("/home/you/#{Chef::Dist::USER_CONF_DIR}/a-new-user.pem").and_return("/home/you/#{Chef::Dist::USER_CONF_DIR}/a-new-user.pem")
     allow(File).to receive(:expand_path).with(default_admin_key).and_return(default_admin_key)
     Chef::Config[:node_name] = "webmonkey.example.com"
 
@@ -175,15 +176,15 @@ describe Chef::Knife::Configure do
     allow(Etc).to receive(:getlogin).and_return("a-new-user")
 
     allow(Chef::Knife::UserCreate).to receive(:new).and_return(user_command)
-    expect(FileUtils).to receive(:mkdir_p).with("/home/you/.chef")
-    expect(::File).to receive(:open).with("/home/you/.chef/credentials", "w")
+    expect(FileUtils).to receive(:mkdir_p).with("/home/you/#{Chef::Dist::USER_CONF_DIR}")
+    expect(::File).to receive(:open).with("/home/you/#{Chef::Dist::USER_CONF_DIR}/credentials", "w")
     @knife.config[:initial] = true
     @knife.config[:user_password] = "blah"
     @knife.run
     expect(user_command.name_args).to eq(Array("a-new-user"))
     expect(user_command.config[:user_password]).to eq("blah")
     expect(user_command.config[:admin]).to be_truthy
-    expect(user_command.config[:file]).to eq("/home/you/.chef/a-new-user.pem")
+    expect(user_command.config[:file]).to eq("/home/you/#{Chef::Dist::USER_CONF_DIR}/a-new-user.pem")
     expect(user_command.config[:yes]).to be_truthy
     expect(user_command.config[:disable_editing]).to be_truthy
   end

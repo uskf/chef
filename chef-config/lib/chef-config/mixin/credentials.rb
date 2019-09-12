@@ -17,6 +17,7 @@
 
 require "tomlrb"
 require_relative "../path_helper"
+require "chef/dist"
 
 module ChefConfig
   module Mixin
@@ -36,7 +37,7 @@ module ChefConfig
       #   normally set via a command-line option.
       # @return [String]
       def credentials_profile(profile = nil)
-        context_file = PathHelper.home(".chef", "context").freeze
+        context_file = PathHelper.home(Chef::Dist::USER_CONF_DIR, "context").freeze
         if !profile.nil?
           profile
         elsif ENV.include?("CHEF_PROFILE")
@@ -53,7 +54,7 @@ module ChefConfig
       # @since 14.4
       # @return [String]
       def credentials_file_path
-        PathHelper.home(".chef", "credentials").freeze
+        PathHelper.home(Chef::Dist::USER_CONF_DIR, "credentials").freeze
       end
 
       # Load and parse the credentials file.

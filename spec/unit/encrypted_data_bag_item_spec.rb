@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+require "chef/dist"
 require "spec_helper"
 require "chef/encrypted_data_bag_item"
 
@@ -405,7 +406,7 @@ describe Chef::EncryptedDataBagItem do
 
     context "when /etc/chef/encrypted_data_bag_secret exists" do
       before do
-        path = Chef::Config.platform_specific_path("/etc/chef/encrypted_data_bag_secret")
+        path = Chef::Config.platform_specific_path("#{Chef::Dist::CONF_DIR}/encrypted_data_bag_secret")
         allow(::File).to receive(:exist?).with(path).and_return(true)
         allow(IO).to receive(:read).with(path).and_return(secret)
       end
@@ -417,7 +418,7 @@ describe Chef::EncryptedDataBagItem do
 
     context "when /etc/chef/encrypted_data_bag_secret does not exist" do
       before do
-        path = Chef::Config.platform_specific_path("/etc/chef/encrypted_data_bag_secret")
+        path = Chef::Config.platform_specific_path("#{Chef::Dist::CONF_DIR}/encrypted_data_bag_secret")
         allow(::File).to receive(:exist?).with(path).and_return(false)
       end
 

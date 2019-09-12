@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "support/shared/integration/integration_helper"
 require "support/shared/context/config"
 
@@ -74,7 +75,7 @@ describe "knife config use-profile", :workstation do
     let(:cmd_args) { %w{production} }
     it do
       is_expected.to eq "Set default profile to production\n"
-      expect(File.read(path_to(".chef/context"))).to eq "production\n"
+      expect(File.read(path_to("#{Chef::Dist::USER_CONF_DIR}/context"))).to eq "production\n"
     end
   end
 
@@ -83,8 +84,8 @@ describe "knife config use-profile", :workstation do
     before { ENV["CHEF_HOME"] = path_to("chefhome"); file("chefhome/tmp", "") }
     it do
       is_expected.to eq "Set default profile to staging\n"
-      expect(File.read(path_to("chefhome/.chef/context"))).to eq "staging\n"
-      expect(File.exist?(path_to(".chef/context"))).to be_falsey
+      expect(File.read(path_to("chefhome/#{Chef::Dist::USER_CONF_DIR}/context"))).to eq "staging\n"
+      expect(File.exist?(path_to("#{Chef::Dist::USER_CONF_DIR}/context"))).to be_falsey
     end
   end
 
@@ -93,8 +94,8 @@ describe "knife config use-profile", :workstation do
     before { ENV["KNIFE_HOME"] = path_to("knifehome"); file("knifehome/tmp", "") }
     it do
       is_expected.to eq "Set default profile to development\n"
-      expect(File.read(path_to("knifehome/.chef/context"))).to eq "development\n"
-      expect(File.exist?(path_to(".chef/context"))).to be_falsey
+      expect(File.read(path_to("knifehome/#{Chef::Dist::USER_CONF_DIR}/context"))).to eq "development\n"
+      expect(File.exist?(path_to("#{Chef::Dist::USER_CONF_DIR}/context"))).to be_falsey
     end
   end
 end

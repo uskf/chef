@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "spec_helper"
 require "#{CHEF_SPEC_DATA}/knife_subcommand/test_yourself"
 
@@ -131,7 +132,7 @@ describe Chef::Application::Knife do
 
   describe "when given a path to the client key" do
     it "expands a relative path relative to the CWD" do
-      relative_path = ".chef/client.pem"
+      relative_path = "#{Chef::Dist::USER_CONF_DIR}/client.pem"
       allow(Dir).to receive(:pwd).and_return(CHEF_SPEC_DATA)
       with_argv(*%W{noop knife command -k #{relative_path}}) do
         expect(@knife).to receive(:exit).with(0)
@@ -141,19 +142,19 @@ describe Chef::Application::Knife do
     end
 
     it "expands a ~/home/path to the correct full path" do
-      home_path = "~/.chef/client.pem"
+      home_path = "~/#{Chef::Dist::USER_CONF_DIR}/client.pem"
       with_argv(*%W{noop knife command -k #{home_path}}) do
         expect(@knife).to receive(:exit).with(0)
         @knife.run
       end
-      expect(Chef::Config[:client_key]).to eq(File.join(ENV["HOME"], ".chef/client.pem").gsub((File::ALT_SEPARATOR || '\\'), File::SEPARATOR))
+      expect(Chef::Config[:client_key]).to eq(File.join(ENV["HOME"], "#{Chef::Dist::USER_CONF_DIR}/client.pem").gsub((File::ALT_SEPARATOR || '\\'), File::SEPARATOR))
     end
 
     it "does not expand a full path" do
       full_path = if windows?
-                    "C:/chef/client.pem"
+                    "C:/#{Chef::Dist::EXEC}/client.pem"
                   else
-                    "/etc/chef/client.pem"
+                    "#{Chef::Dist::CONF_DIR}/client.pem"
                   end
       with_argv(*%W{noop knife command -k #{full_path}}) do
         expect(@knife).to receive(:exit).with(0)

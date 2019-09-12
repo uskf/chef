@@ -21,6 +21,7 @@
 require "spec_helper"
 require "chef/run_context"
 require "chef/server_api"
+require "chef/dist"
 require "rbconfig"
 
 class FooError < RuntimeError
@@ -181,7 +182,7 @@ shared_context "a client run" do
 
   before do
     Chef::Config[:client_fork] = enable_fork
-    Chef::Config[:cache_path] = windows? ? 'C:\chef' : "/var/chef"
+    Chef::Config[:cache_path] = windows? ? 'C:\\'+Chef::Dist::EXEC : "/var/#{Chef::Dist::EXEC}"
     Chef::Config[:why_run] = false
     Chef::Config[:chef_guid] = "default-guid"
 

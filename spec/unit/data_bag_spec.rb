@@ -18,6 +18,7 @@
 
 require "spec_helper"
 require "chef/data_bag"
+require "chef/dist"
 
 describe Chef::DataBag do
   before(:each) do
@@ -243,17 +244,17 @@ describe Chef::DataBag do
 
         expect do
           Chef::DataBag.load("foo")
-        end.to raise_error Chef::Exceptions::InvalidDataBagPath, "Data bag path '/var/chef/data_bags' is invalid"
+        end.to raise_error Chef::Exceptions::InvalidDataBagPath, "Data bag path '/var/#{Chef::Dist::EXEC}/data_bags' is invalid"
       end
 
     end
 
     describe "data bag with string path" do
-      it_should_behave_like "data bag in solo mode", "/var/chef/data_bags"
+      it_should_behave_like "data bag in solo mode", "/var/#{Chef::Dist::EXEC}/data_bags"
     end
 
     describe "data bag with array path" do
-      it_should_behave_like "data bag in solo mode", ["/var/chef/data_bags", "/var/chef/data_bags_2"]
+      it_should_behave_like "data bag in solo mode", ["/var/#{Chef::Dist::EXEC}/data_bags", "/var/#{Chef::Dist::EXEC}/data_bags_2"]
     end
   end
 

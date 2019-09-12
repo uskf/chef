@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "support/shared/integration/integration_helper"
 require "chef/mixin/shell_out"
 
@@ -75,7 +76,7 @@ describe "chef-client" do
 
   let(:chef_dir) { File.join(File.dirname(__FILE__), "..", "..", "..", "bin") }
 
-  let(:chef_client_cmd) { %Q{bundle exec chef-client --minimal-ohai -c "#{path_to("config/client.rb")}" -lwarn} }
+  let(:chef_client_cmd) { %Q{bundle exec #{Chef::Dist::CLIENT} --minimal-ohai -c "#{path_to("config/client.rb")}" -lwarn} }
 
   after do
     FileUtils.rm_rf(cache_path)

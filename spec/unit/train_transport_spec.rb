@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+require "chef/dist"
 require "spec_helper"
 
 describe Chef::TrainTransport do
@@ -40,7 +41,7 @@ describe Chef::TrainTransport do
     # [foo.example.org]   => {"foo"=>{"example"=>{"org"=>{}}}}
     # ['foo.example.org'] => {"foo.example.org"=>{}}
     it "warns if the host has been split by toml" do
-      allow(Chef::TrainTransport).to receive(:credentials_file_path).and_return("/Users/scotthourglass/.chef/credentials")
+      allow(Chef::TrainTransport).to receive(:credentials_file_path).and_return("/Users/scotthourglass/#{Chef::Dist::USER_CONF_DIR}/credentials")
       allow(Chef::TrainTransport).to receive(:parse_credentials_file).and_return({ "foo" => { "example" => { "org" => {} } } })
       expect(Chef::Log).to receive(:warn).with(/as a Hash/)
       expect(Chef::Log).to receive(:warn).with(/Hostnames must be surrounded by single quotes/)
@@ -50,7 +51,7 @@ describe Chef::TrainTransport do
 
   describe "credentials_file_path" do
     let(:config_cred_file_path) { "/somewhere/credentials" }
-    let(:host_cred_file_path) { Chef::Platform.windows? ? "C:\\chef\\foo.example.org\\credentials" : "/etc/chef/foo.example.org/credentials" }
+    let(:host_cred_file_path) { Chef::Platform.windows? ? "C:\\chef\\foo.example.org\\credentials" : "#{Chef::Dist::CONF_DIR}/foo.example.org/credentials" }
 
     context "when a file path is specified by a config" do
       before do

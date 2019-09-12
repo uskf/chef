@@ -20,6 +20,7 @@ require "spec_helper"
 require "functional/resource/base"
 require "chef/version"
 require "chef/shell"
+require "chef/dist"
 
 describe Shell do
 
@@ -82,8 +83,8 @@ describe Shell do
 
       require "pty"
       config = File.expand_path("shef-config.rb", CHEF_SPEC_DATA)
-      reader, writer, pid = PTY.spawn("bundle exec chef-shell -c #{config} #{options}")
-      read_until(reader, "chef (#{Chef::VERSION})>")
+      reader, writer, pid = PTY.spawn("bundle exec #{Chef::Dist::SHELL} -c #{config} #{options}")
+      read_until(reader, "#{Chef::Dist::EXEC} (#{Chef::VERSION})>")
       yield reader, writer if block_given?
       writer.puts('"done"')
       output = read_until(reader, '=> "done"')

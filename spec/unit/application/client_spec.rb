@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "spec_helper"
 
 shared_context "with signal handlers" do
@@ -78,7 +79,7 @@ describe Chef::Application::Client, "reconfigure" do
 
     allow(Kernel).to receive(:trap).and_return(:ok)
     allow(::File).to receive(:read).and_call_original
-    allow(::File).to receive(:read).with(Chef::Config.platform_specific_path("/etc/chef/client.rb")).and_return("")
+    allow(::File).to receive(:read).with(Chef::Config.platform_specific_path("#{Chef::Dist::CONF_DIR}/client.rb")).and_return("")
 
     @original_argv = ARGV.dup
     ARGV.clear
@@ -219,8 +220,8 @@ describe Chef::Application::Client, "reconfigure" do
         allow(Mixlib::Archive).to receive(:new).and_return(archive)
         allow(archive).to receive(:extract)
         allow(Chef::Config).to receive(:from_string)
-        allow(IO).to receive(:read).with(File.join("the_path_to_the_repo", ".chef/config.rb")).and_return("new_config")
-        allow(File).to receive(:file?).with(File.join("the_path_to_the_repo", ".chef/config.rb")).and_return(config_exists)
+        allow(IO).to receive(:read).with(File.join("the_path_to_the_repo", "#{Chef::Dist::USER_CONF_DIR}/config.rb")).and_return("new_config")
+        allow(File).to receive(:file?).with(File.join("the_path_to_the_repo", "#{Chef::Dist::USER_CONF_DIR}/config.rb")).and_return(config_exists)
       end
 
       context "local mode not set" do
@@ -293,7 +294,7 @@ describe Chef::Application::Client, "reconfigure" do
             expect(Chef::Config).to receive(:from_string)
               .with(
                 "new_config",
-                File.join("the_path_to_the_repo", ".chef/config.rb")
+                File.join("the_path_to_the_repo", "#{Chef::Dist::USER_CONF_DIR}/config.rb")
               )
 
             app.reconfigure
@@ -483,7 +484,7 @@ describe Chef::Application::Client, "configure_chef" do
     @original_argv = ARGV.dup
     ARGV.clear
     allow(::File).to receive(:read).and_call_original
-    allow(::File).to receive(:read).with(Chef::Config.platform_specific_path("/etc/chef/client.rb")).and_return("")
+    allow(::File).to receive(:read).with(Chef::Config.platform_specific_path("#{Chef::Dist::CONF_DIR}/client.rb")).and_return("")
     app.configure_chef
   end
 

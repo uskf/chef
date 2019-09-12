@@ -19,6 +19,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "mixlib/config" unless defined?(Mixlib::Config)
 require "pathname" unless defined?(Pathname)
 
@@ -123,7 +124,7 @@ module ChefConfig
       if config_file
         PathHelper.dirname(PathHelper.canonical_path(config_file, false))
       else
-        PathHelper.join(PathHelper.cleanpath(user_home), ".chef", "")
+        PathHelper.join(PathHelper.cleanpath(user_home), Chef::Dist::USER_CONF_DIR, "")
       end
     end
 
@@ -284,13 +285,13 @@ module ChefConfig
         PathHelper.join(config_dir, "local-mode-cache")
       else
         primary_cache_root = platform_specific_path("/var")
-        primary_cache_path = platform_specific_path("/var/chef")
+        primary_cache_path = platform_specific_path("/var/#{Chef::Dist::EXEC}")
         # Use /var/chef as the cache path only if that folder exists and we can read and write
         # into it, or /var exists and we can read and write into it (we'll create /var/chef later).
         # Otherwise, we'll create .chef under the user's home directory and use that as
         # the cache path.
         unless path_accessible?(primary_cache_path) || path_accessible?(primary_cache_root)
-          secondary_cache_path = PathHelper.join(user_home, ".chef")
+          secondary_cache_path = PathHelper.join(user_home, Chef::Dist::USER_CONF_DIR)
           secondary_cache_path = target_mode? ? "#{secondary_cache_path}/#{target_mode.host}" : secondary_cache_path
           ChefConfig.logger.trace("Unable to access cache at #{primary_cache_path}. Switching cache to #{secondary_cache_path}")
           secondary_cache_path
@@ -321,7 +322,7 @@ module ChefConfig
     # If your `file_cache_path` resides on a NFS (or non-flock()-supporting
     # fs), it's recommended to set this to something like
     # '/tmp/chef-client-running.pid'
-    default(:lockfile) { PathHelper.join(file_cache_path, "chef-client-running.pid") }
+    default(:lockfile) { PathHelper.join(file_cache_path, "#{Chef::Dist::CLIENT}-running.pid") }
 
     ## Daemonization Settings ##
     # What user should Chef run as?
@@ -644,9 +645,9 @@ module ChefConfig
       if chef_zero.enabled
         nil
       elsif target_mode?
-        platform_specific_path("/etc/chef/#{target_mode.host}/client.pem")
+        platform_specific_path("#{Chef::Dist::CONF_DIR}/#{target_mode.host}/client.pem")
       else
-        platform_specific_path("/etc/chef/client.pem")
+        platform_specific_path("#{Chef::Dist::CONF_DIR}/client.pem")
       end
     end
 
@@ -668,10 +669,10 @@ module ChefConfig
 
     # This secret is used to decrypt encrypted data bag items.
     default(:encrypted_data_bag_secret) do
-      if target_mode? && File.exist?(platform_specific_path("/etc/chef/#{target_mode.host}/encrypted_data_bag_secret"))
-        platform_specific_path("/etc/chef/#{target_mode.host}/encrypted_data_bag_secret")
-      elsif File.exist?(platform_specific_path("/etc/chef/encrypted_data_bag_secret"))
-        platform_specific_path("/etc/chef/encrypted_data_bag_secret")
+      if target_mode? && File.exist?(platform_specific_path("#{Chef::Dist::CONF_DIR}/#{target_mode.host}/encrypted_data_bag_secret"))
+        platform_specific_path("#{Chef::Dist::CONF_DIR}/#{target_mode.host}/encrypted_data_bag_secret")
+      elsif File.exist?(platform_specific_path("#{Chef::Dist::CONF_DIR}/encrypted_data_bag_secret"))
+        platform_specific_path("#{Chef::Dist::CONF_DIR}/encrypted_data_bag_secret")
       else
         nil
       end
@@ -698,7 +699,7 @@ module ChefConfig
     # The `validation_key` is never used if the `client_key` exists.
     #
     # If chef-zero is enabled, this defaults to nil (no authentication).
-    default(:validation_key) { chef_zero.enabled ? nil : platform_specific_path("/etc/chef/validation.pem") }
+    default(:validation_key) { chef_zero.enabled ? nil : platform_specific_path("#{Chef::Dist::CONF_DIR}/validation.pem") }
     default :validation_client_name do
       # If the URL is set and looks like a normal Chef Server URL, extract the
       # org name and use that as part of the default.

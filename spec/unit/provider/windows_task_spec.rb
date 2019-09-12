@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+require "chef/dist"
 require "spec_helper"
 
 describe Chef::Provider::WindowsTask, :windows_only do
@@ -37,9 +38,9 @@ describe Chef::Provider::WindowsTask, :windows_only do
 
   describe "#set_command_and_arguments" do
     it "sets the command arguments if command has arguments passed in it" do
-      new_resource.command = "chef-client -W"
+      new_resource.command = "#{Chef::Dist::CLIENT} -W"
       provider.send(:set_command_and_arguments)
-      expect(new_resource.command).to eq("chef-client")
+      expect(new_resource.command).to eq(Chef::Dist::CLIENT)
       expect(new_resource.command_arguments).to eq("-W")
     end
   end

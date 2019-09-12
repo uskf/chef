@@ -17,6 +17,7 @@
 #
 require "spec_helper"
 require "chef/cookbook_version"
+require "chef/dist"
 
 describe Chef::Cookbook::FileVendor do
 
@@ -75,7 +76,7 @@ describe Chef::Cookbook::FileVendor do
 
   context "when configured to load files from disk" do
 
-    let(:cookbook_path) { %w{/var/chef/cookbooks /var/chef/other_cookbooks} }
+    let(:cookbook_path) { %W{/var/#{Chef::Dist::EXEC}/cookbooks /var/#{Chef::Dist::EXEC}/other_cookbooks} }
 
     let(:manifest) do
       cbv = Chef::CookbookVersion.new("bob", Array(Dir.tmpdir))

@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "spec_helper"
 
 describe Chef::Application do
@@ -114,13 +115,13 @@ describe Chef::Application do
 
       it "should parse the commandline options" do
         expect(@app).to receive(:parse_options).and_return(true)
-        @app.config[:config_file] = "/etc/chef/default.rb" # have a config file set, to prevent triggering error block
+        @app.config[:config_file] = "#{Chef::Dist::CONF_DIR}/default.rb" # have a config file set, to prevent triggering error block
         @app.configure_chef
       end
 
       describe "when a config_file is present" do
         let(:config_content) { "rspec_ran('true')" }
-        let(:config_location) { "/etc/chef/default.rb" }
+        let(:config_location) { "#{Chef::Dist::CONF_DIR}/default.rb" }
 
         let(:config_location_pathname) do
           p = Pathname.new(config_location)
@@ -145,7 +146,7 @@ describe Chef::Application do
         end
 
         it "should merge the local config hash into chef::config" do
-          # File.should_receive(:open).with("/etc/chef/default.rb").and_yield(@config_file)
+          # File.should_receive(:open).with("#{Chef::Dist::CONF_DIR}/default.rb").and_yield(@config_file)
           @app.configure_chef
           expect(Chef::Config.rspec_ran).to eq("true")
         end
@@ -168,7 +169,7 @@ describe Chef::Application do
         end
 
         it "should emit a warning" do
-          expect(Chef::Config).not_to receive(:from_file).with("/etc/chef/default.rb")
+          expect(Chef::Config).not_to receive(:from_file).with("#{Chef::Dist::CONF_DIR}/default.rb")
           expect(Chef::Log).to receive(:warn).with("No config file found or specified on command line. Using command line options instead.")
           @app.configure_chef
         end
@@ -176,7 +177,7 @@ describe Chef::Application do
 
       describe "when the config file is set and not found" do
         before do
-          @app.config[:config_file] = "/etc/chef/notfound"
+          @app.config[:config_file] = "#{Chef::Dist::CONF_DIR}/notfound"
         end
         it "should use the passed in command line options and defaults" do
           expect(Chef::Config).to receive(:merge!).at_least(:once)

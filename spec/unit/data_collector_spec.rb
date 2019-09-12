@@ -18,6 +18,7 @@
 require File.expand_path("../../spec_helper", __FILE__)
 require "chef/data_collector"
 require "socket"
+require "chef/dist"
 
 describe Chef::DataCollector do
   before(:each) do
@@ -956,7 +957,7 @@ describe Chef::DataCollector do
       # this is different specifically for 404s
       it "logs an info message and does not raise an exception when raise_on_failure is disabled" do
         Chef::Config[:data_collector][:raise_on_failure] = false
-        expect(Chef::Log).to receive(:debug).with(/This is normal if you do not have Chef Automate/)
+        expect(Chef::Log).to receive(:debug).with(/This is normal if you do not have #{Chef::Dist::AUTOMATE}/)
         data_collector.send(:send_to_data_collector, message)
       end
     end

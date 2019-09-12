@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+require "chef/dist"
 require "spec_helper"
 require "chef/knife/core/windows_bootstrap_context"
 describe Chef::Knife::Core::WindowsBootstrapContext do
@@ -226,13 +227,13 @@ describe Chef::Knife::Core::WindowsBootstrapContext do
 
   describe "bootstrap_install_command for bootstrap through WinRM" do
     context "when bootstrap_install_command option is passed on CLI" do
-      let(:bootstrap) { Chef::Knife::Bootstrap.new(["--bootstrap-install-command", "chef-client"]) }
+      let(:bootstrap) { Chef::Knife::Bootstrap.new(["--bootstrap-install-command", Chef::Dist::CLIENT]) }
       before do
-        bootstrap.config[:bootstrap_install_command] = "chef-client"
+        bootstrap.config[:bootstrap_install_command] = Chef::Dist::CLIENT
       end
 
       it "sets the bootstrap_install_command option under Chef::Config::Knife object" do
-        expect(Chef::Config[:knife][:bootstrap_install_command]).to eq("chef-client")
+        expect(Chef::Config[:knife][:bootstrap_install_command]).to eq(Chef::Dist::CLIENT)
       end
 
       after do
@@ -251,13 +252,13 @@ describe Chef::Knife::Core::WindowsBootstrapContext do
 
   describe "bootstrap_install_command for bootstrap through SSH" do
     context "when bootstrap_install_command option is passed on CLI" do
-      let(:bootstrap) { Chef::Knife::Bootstrap.new(["--bootstrap-install-command", "chef-client"]) }
+      let(:bootstrap) { Chef::Knife::Bootstrap.new(["--bootstrap-install-command", Chef::Dist::CLIENT]) }
       before do
-        bootstrap.config[:bootstrap_install_command] = "chef-client"
+        bootstrap.config[:bootstrap_install_command] = Chef::Dist::CLIENT
       end
 
       it "sets the bootstrap_install_command option under Chef::Config::Knife object" do
-        expect(Chef::Config[:knife][:bootstrap_install_command]).to eq("chef-client")
+        expect(Chef::Config[:knife][:bootstrap_install_command]).to eq(Chef::Dist::CLIENT)
       end
 
       after do

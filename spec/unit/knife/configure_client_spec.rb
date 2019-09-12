@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+require "chef/dist"
 require "spec_helper"
 
 describe Chef::Knife::ConfigureClient do
@@ -23,7 +24,7 @@ describe Chef::Knife::ConfigureClient do
     @knife = Chef::Knife::ConfigureClient.new
     Chef::Config[:chef_server_url] = "https://chef.example.com"
     Chef::Config[:validation_client_name] = "chef-validator"
-    Chef::Config[:validation_key] = "/etc/chef/validation.pem"
+    Chef::Config[:validation_key] = "#{Chef::Dist::CONF_DIR}/validation.pem"
 
     @stderr = StringIO.new
     allow(@knife.ui).to receive(:stderr).and_return(@stderr)
@@ -40,18 +41,18 @@ describe Chef::Knife::ConfigureClient do
 
     describe "when specifing a directory" do
       before do
-        @knife.name_args = ["/home/bob/.chef"]
+        @knife.name_args = ["/home/bob/#{Chef::Dist::USER_CONF_DIR}"]
         @client_file = StringIO.new
         @validation_file = StringIO.new
-        expect(File).to receive(:open).with("/home/bob/.chef/client.rb", "w")
+        expect(File).to receive(:open).with("/home/bob/#{Chef::Dist::USER_CONF_DIR}/client.rb", "w")
           .and_yield(@client_file)
-        expect(File).to receive(:open).with("/home/bob/.chef/validation.pem", "w")
+        expect(File).to receive(:open).with("/home/bob/#{Chef::Dist::USER_CONF_DIR}/validation.pem", "w")
           .and_yield(@validation_file)
         expect(IO).to receive(:read).and_return("foo_bar_baz")
       end
 
       it "should recursively create the directory" do
-        expect(FileUtils).to receive(:mkdir_p).with("/home/bob/.chef")
+        expect(FileUtils).to receive(:mkdir_p).with("/home/bob/#{Chef::Dist::USER_CONF_DIR}")
         @knife.run
       end
 

@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "spec_helper"
 
 describe Chef::Application::Solo do
@@ -100,21 +101,21 @@ describe Chef::Application::Solo do
       end
 
       it "downloads a tarball when the recipe_url configuration option is specified" do
-        Chef::Config[:cookbook_path] = "#{Dir.tmpdir}/chef-solo/cookbooks"
+        Chef::Config[:cookbook_path] = "#{Dir.tmpdir}/#{Chef::Dist::SOLOEXEC}/cookbooks"
         Chef::Config[:recipe_url] = "http://junglist.gen.nz/recipes.tgz"
 
-        expect(FileUtils).to receive(:mkdir_p).with("#{Dir.tmpdir}/chef-solo").and_return(true)
+        expect(FileUtils).to receive(:mkdir_p).with("#{Dir.tmpdir}/#{Chef::Dist::SOLOEXEC}").and_return(true)
 
         tarfile = StringIO.new("remote_tarball_content")
         target_file = StringIO.new
 
         expect(app).to receive(:open).with("http://junglist.gen.nz/recipes.tgz").and_yield(tarfile)
-        expect(File).to receive(:open).with("#{Dir.tmpdir}/chef-solo/recipes.tgz", "wb").and_yield(target_file)
+        expect(File).to receive(:open).with("#{Dir.tmpdir}/#{Chef::Dist::SOLOEXEC}/recipes.tgz", "wb").and_yield(target_file)
 
         archive = double(Mixlib::Archive)
 
-        expect(Mixlib::Archive).to receive(:new).with("#{Dir.tmpdir}/chef-solo/recipes.tgz").and_return(archive)
-        expect(archive).to receive(:extract).with("#{Dir.tmpdir}/chef-solo", { perms: false, ignore: /^\.$/ })
+        expect(Mixlib::Archive).to receive(:new).with("#{Dir.tmpdir}/#{Chef::Dist::SOLOEXEC}/recipes.tgz").and_return(archive)
+        expect(archive).to receive(:extract).with("#{Dir.tmpdir}/#{Chef::Dist::SOLOEXEC}", { perms: false, ignore: /^\.$/ })
         app.reconfigure
         expect(target_file.string).to eq("remote_tarball_content")
       end
@@ -125,13 +126,13 @@ describe Chef::Application::Solo do
 
         Chef::Config[:json_attribs] = "https://foo.com/foo.json"
         Chef::Config[:recipe_url] = "http://icanhas.cheezburger.com/lolcats"
-        Chef::Config[:cookbook_path] = "#{Dir.tmpdir}/chef-solo/cookbooks"
-        expect(FileUtils).to receive(:mkdir_p).with("#{Dir.tmpdir}/chef-solo").and_return(true)
+        Chef::Config[:cookbook_path] = "#{Dir.tmpdir}/#{Chef::Dist::SOLOEXEC}/cookbooks"
+        expect(FileUtils).to receive(:mkdir_p).with("#{Dir.tmpdir}/#{Chef::Dist::SOLOEXEC}").and_return(true)
 
         archive = double(Mixlib::Archive)
 
-        expect(Mixlib::Archive).to receive(:new).with("#{Dir.tmpdir}/chef-solo/recipes.tgz").and_return(archive)
-        expect(archive).to receive(:extract).with("#{Dir.tmpdir}/chef-solo", { perms: false, ignore: /^\.$/ })
+        expect(Mixlib::Archive).to receive(:new).with("#{Dir.tmpdir}/#{Chef::Dist::SOLOEXEC}/recipes.tgz").and_return(archive)
+        expect(archive).to receive(:extract).with("#{Dir.tmpdir}/#{Chef::Dist::SOLOEXEC}", { perms: false, ignore: /^\.$/ })
         expect(app).to receive(:fetch_recipe_tarball).ordered
         expect(Chef::ConfigFetcher).to receive(:new).ordered.and_return(config_fetcher)
         app.reconfigure
@@ -197,10 +198,10 @@ describe Chef::Application::Solo do
     end
 
     it "sets the repo path" do
-      expect(Chef::Config).to receive(:find_chef_repo_path).and_return("/var/chef")
+      expect(Chef::Config).to receive(:find_chef_repo_path).and_return("/var/#{Chef::Dist::EXEC}")
       app.reconfigure
       expect(Chef::Config.key?(:chef_repo_path)).to be_truthy
-      expect(Chef::Config[:chef_repo_path]).to eq ("/var/chef")
+      expect(Chef::Config[:chef_repo_path]).to eq ("/var/#{Chef::Dist::EXEC}")
     end
 
     it "runs chef-client in local mode" do

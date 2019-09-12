@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+require "chef/dist"
 require "spec_helper"
 
 describe Chef::Formatters::ErrorDescription do
@@ -51,15 +52,15 @@ describe Chef::Formatters::ErrorDescription do
     before do
       stub_const("Chef::VERSION", "1.2.3")
       stub_const("RUBY_DESCRIPTION", "ruby 2.3.1p112 (2016-04-26 revision 54768) [x86_64-darwin15]")
-      allow(subject).to receive(:caller) { Kernel.caller + ["/test/bin/chef-client:1:in `<main>'"] }
+      allow(subject).to receive(:caller) { Kernel.caller + ["/test/bin/#{Chef::Dist::CLIENT}:1:in `<main>'"] }
       allow(File).to receive(:realpath).and_call_original
-      allow(File).to receive(:realpath).with("/test/bin/chef-client").and_return("/test/bin/chef-client")
+      allow(File).to receive(:realpath).with("/test/bin/#{Chef::Dist::CLIENT}").and_return("/test/bin/#{Chef::Dist::CLIENT}")
     end
 
     around do |ex|
       old_program_name = $PROGRAM_NAME
       begin
-        $PROGRAM_NAME = "chef-client"
+        $PROGRAM_NAME = Chef::Dist::CLIENT
         ex.run
       ensure
         $PROGRAM_NAME = old_program_name
@@ -76,10 +77,10 @@ describe Chef::Formatters::ErrorDescription do
 
           System Info:
           ------------
-          chef_version=1.2.3
+          #{Chef::Dist::EXEC}_version=1.2.3
           ruby=ruby 2.3.1p112 (2016-04-26 revision 54768) [x86_64-darwin15]
-          program_name=chef-client
-          executable=/test/bin/chef-client
+          program_name=#{Chef::Dist::CLIENT}
+          executable=/test/bin/#{Chef::Dist::CLIENT}
 
         END
       end
@@ -103,10 +104,10 @@ describe Chef::Formatters::ErrorDescription do
 
           System Info:
           ------------
-          chef_version=1.2.3
+          #{Chef::Dist::EXEC}_version=1.2.3
           ruby=ruby 2.3.1p112 (2016-04-26 revision 54768) [x86_64-darwin15]
-          program_name=chef-client
-          executable=/test/bin/chef-client
+          program_name=#{Chef::Dist::CLIENT}
+          executable=/test/bin/#{Chef::Dist::CLIENT}
 
         END
       end
@@ -126,12 +127,12 @@ describe Chef::Formatters::ErrorDescription do
 
           System Info:
           ------------
-          chef_version=1.2.3
+          #{Chef::Dist::EXEC}_version=1.2.3
           platform=openvms
           platform_version=8.4-2L1
           ruby=ruby 2.3.1p112 (2016-04-26 revision 54768) [x86_64-darwin15]
-          program_name=chef-client
-          executable=/test/bin/chef-client
+          program_name=#{Chef::Dist::CLIENT}
+          executable=/test/bin/#{Chef::Dist::CLIENT}
 
         END
       end

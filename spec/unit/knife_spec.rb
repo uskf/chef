@@ -21,6 +21,7 @@
 module KnifeSpecs
 end
 
+require "chef/dist"
 require "spec_helper"
 require "uri"
 require "chef/knife/core/gem_glob_loader"
@@ -31,13 +32,13 @@ describe Chef::Knife do
 
   let(:knife) { Chef::Knife.new }
 
-  let(:config_location) { File.expand_path("~/.chef/config.rb") }
+  let(:config_location) { File.expand_path("~/#{Chef::Dist::USER_CONF_DIR}/config.rb") }
 
   let(:config_loader) do
     instance_double("WorkstationConfigLoader",
       load: nil, no_config_found?: false,
       config_location: config_location,
-      chef_config_dir: "/etc/chef")
+      chef_config_dir: Chef::Dist::CONF_DIR)
   end
 
   before(:each) do
@@ -359,7 +360,7 @@ describe Chef::Knife do
         before do
           knife.config[:verbosity] = 1
           knife.config[:config_file] = fake_config
-          config_loader = double("Chef::WorkstationConfigLoader", load: true, no_config_found?: false, chef_config_dir: "/etc/chef", config_location: fake_config)
+          config_loader = double("Chef::WorkstationConfigLoader", load: true, no_config_found?: false, chef_config_dir: Chef::Dist::CONF_DIR, config_location: fake_config)
           allow(config_loader).to receive(:explicit_config_file=).with(fake_config).and_return(fake_config)
           allow(config_loader).to receive(:profile=)
           allow(Chef::WorkstationConfigLoader).to receive(:new).and_return(config_loader)
@@ -581,9 +582,9 @@ describe Chef::Knife do
 
     it "formats missing private key errors nicely" do
       allow(knife).to receive(:run).and_raise(Chef::Exceptions::PrivateKeyMissing.new("key not there"))
-      allow(knife).to receive(:api_key).and_return("/home/root/.chef/no-key-here.pem")
+      allow(knife).to receive(:api_key).and_return("/home/root/#{Chef::Dist::USER_CONF_DIR}/no-key-here.pem")
       knife.run_with_pretty_exceptions
-      expect(stderr.string).to match(%r{ERROR: Your private key could not be loaded from /home/root/.chef/no-key-here.pem})
+      expect(stderr.string).to match(%r{ERROR: Your private key could not be loaded from /home/root/#{Chef::Dist::USER_CONF_DIR}/no-key-here.pem})
       expect(stderr.string).to match(/Check your configuration file and ensure that your private key is readable/)
     end
 

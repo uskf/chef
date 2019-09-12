@@ -91,7 +91,7 @@ class Chef
         @node = nil
 
         if Chef::Config[:solo_legacy_mode]
-          raise UnsupportedFeature, "Policyfile does not support chef-solo. Use #{Chef::Dist::CLIENT} local mode instead."
+          raise UnsupportedFeature, "Policyfile does not support #{Chef::Dist::SOLOEXEC}. Use #{Chef::Dist::CLIENT} local mode instead."
         end
 
         if override_runlist

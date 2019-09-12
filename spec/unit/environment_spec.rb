@@ -21,6 +21,7 @@
 
 require "spec_helper"
 require "chef/environment"
+require "chef/dist"
 
 describe Chef::Environment do
   before(:each) do
@@ -393,7 +394,7 @@ describe Chef::Environment do
     describe "in solo mode" do
       before do
         Chef::Config[:solo_legacy_mode] = true
-        Chef::Config[:environment_path] = "/var/chef/environments"
+        Chef::Config[:environment_path] = "/var/#{Chef::Dist::EXEC}/environments"
       end
 
       after do
@@ -454,7 +455,7 @@ describe Chef::Environment do
 
         expect do
           Chef::Environment.load("foo")
-        end.to raise_error Chef::Exceptions::InvalidEnvironmentPath, "Environment path '/var/chef/environments' is invalid"
+        end.to raise_error Chef::Exceptions::InvalidEnvironmentPath, "Environment path '/var/#{Chef::Dist::EXEC}/environments' is invalid"
       end
 
       it "should raise an error if the file does not exist" do

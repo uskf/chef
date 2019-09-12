@@ -17,6 +17,7 @@
 #
 
 require "spec_helper"
+require "chef/dist"
 
 describe Chef::Formatters::ErrorInspectors::ResourceFailureInspector do
   include Chef::DSL::Recipe
@@ -42,7 +43,7 @@ describe Chef::Formatters::ErrorInspectors::ResourceFailureInspector do
     @outputter = Chef::Formatters::IndentableOutputStream.new(@stdout, STDERR)
     # @outputter = Chef::Formatters::IndentableOutputStream.new(STDOUT, STDERR)
 
-    allow(Chef::Config).to receive(:cookbook_path).and_return([ "/var/chef/cache" ])
+    allow(Chef::Config).to receive(:cookbook_path).and_return([ "/var/#{Chef::Dist::EXEC}/cache" ])
   end
 
   describe "when explaining an error converging a resource" do
@@ -58,8 +59,8 @@ describe Chef::Formatters::ErrorInspectors::ResourceFailureInspector do
       end
 
       @trace = [
-        "/var/chef/cache/cookbooks/syntax-err/recipes/default.rb:14:in `from_file'",
-        "/var/chef/cache/cookbooks/syntax-err/recipes/default.rb:11:in `from_file'",
+        "/var/#{Chef::Dist::EXEC}/cache/cookbooks/syntax-err/recipes/default.rb:14:in `from_file'",
+        "/var/#{Chef::Dist::EXEC}/cache/cookbooks/syntax-err/recipes/default.rb:11:in `from_file'",
         "/usr/local/lib/ruby/gems/chef/lib/chef/client.rb:123:in `run'", # should not display
       ]
       @exception = Chef::Exceptions::Package.new("No such package 'non-existing-package'")
@@ -70,8 +71,8 @@ describe Chef::Formatters::ErrorInspectors::ResourceFailureInspector do
 
     it "filters chef core code from the backtrace" do
       @expected_filtered_trace = [
-        "/var/chef/cache/cookbooks/syntax-err/recipes/default.rb:14:in `from_file'",
-        "/var/chef/cache/cookbooks/syntax-err/recipes/default.rb:11:in `from_file'",
+        "/var/#{Chef::Dist::EXEC}/cache/cookbooks/syntax-err/recipes/default.rb:14:in `from_file'",
+        "/var/#{Chef::Dist::EXEC}/cache/cookbooks/syntax-err/recipes/default.rb:11:in `from_file'",
       ]
 
       expect(@inspector.filtered_bt).to eq(@expected_filtered_trace)

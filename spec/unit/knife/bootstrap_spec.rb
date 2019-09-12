@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+require "chef/dist"
 require "spec_helper"
 
 Chef::Knife::Bootstrap.load_deps
@@ -91,14 +92,14 @@ describe Chef::Knife::Bootstrap do
     end
 
     it "should render client.rb" do
-      expect(rendered_template).to match("cat > /etc/chef/client.rb <<'EOP'")
+      expect(rendered_template).to match("cat > #{Chef::Dist::CONF_DIR}/client.rb <<'EOP'")
       expect(rendered_template).to match("chef_server_url  \"https://localhost:443\"")
       expect(rendered_template).to match("validation_client_name \"chef-validator\"")
       expect(rendered_template).to match("log_location   STDOUT")
     end
 
     it "should render first-boot.json" do
-      expect(rendered_template).to match("cat > /etc/chef/first-boot.json <<'EOP'")
+      expect(rendered_template).to match("cat > #{Chef::Dist::CONF_DIR}/first-boot.json <<'EOP'")
       expect(rendered_template).to match('{"run_list":\[\]}')
     end
 
@@ -106,7 +107,7 @@ describe Chef::Knife::Bootstrap do
       it "should render encrypted_data_bag_secret file" do
         expect(knife).to receive(:encryption_secret_provided_ignore_encrypt_flag?).and_return(true)
         expect(knife).to receive(:read_secret).and_return("secrets")
-        expect(rendered_template).to match("cat > /etc/chef/encrypted_data_bag_secret <<'EOP'")
+        expect(rendered_template).to match("cat > #{Chef::Dist::CONF_DIR}/encrypted_data_bag_secret <<'EOP'")
         expect(rendered_template).to match('{"run_list":\[\]}')
         expect(rendered_template).to match(/secrets/)
       end
@@ -189,7 +190,7 @@ describe Chef::Knife::Bootstrap do
 
       let(:chef_config_dir_template_path) { "/knife/chef/config/bootstrap/example.erb" }
 
-      let(:env_home_template_path) { "/env/home/.chef/bootstrap/example.erb" }
+      let(:env_home_template_path) { "/env/home/#{Chef::Dist::USER_CONF_DIR}/bootstrap/example.erb" }
 
       let(:gem_files_template_path) { "/Users/schisamo/.rvm/gems/ruby-1.9.2-p180@chef-0.10/gems/knife-windows-0.5.4/lib/chef/knife/bootstrap/fake-bootstrap-template.erb" }
 
@@ -198,7 +199,7 @@ describe Chef::Knife::Bootstrap do
       end
 
       def configure_env_home
-        allow(Chef::Util::PathHelper).to receive(:home).with(".chef", "bootstrap", "example.erb").and_yield(env_home_template_path)
+        allow(Chef::Util::PathHelper).to receive(:home).with(Chef::Dist::USER_CONF_DIR, "bootstrap", "example.erb").and_yield(env_home_template_path)
       end
 
       def configure_gem_files
@@ -275,7 +276,7 @@ describe Chef::Knife::Bootstrap do
         before do
           configure_chef_config_dir
           configure_gem_files
-          allow(Chef::Util::PathHelper).to receive(:home).with(".chef", "bootstrap", "example.erb").and_return(nil)
+          allow(Chef::Util::PathHelper).to receive(:home).with(Chef::Dist::USER_CONF_DIR, "bootstrap", "example.erb").and_return(nil)
 
           expect(File).to receive(:exists?).with(builtin_template_path).and_return(false)
           expect(File).to receive(:exists?).with(chef_config_dir_template_path).and_return(false)
@@ -361,7 +362,7 @@ describe Chef::Knife::Bootstrap do
     it "should create a hint file when told to" do
       knife.parse_options(["--hint", "openstack"])
       knife.merge_configs
-      expect(knife.render_template).to match(%r{/etc/chef/ohai/hints/openstack.json})
+      expect(knife.render_template).to match(%r{#{Chef::Dist::CONF_DIR}/ohai/hints/openstack.json})
     end
 
     it "should populate a hint file with JSON when given a file to read" do
@@ -466,7 +467,7 @@ describe Chef::Knife::Bootstrap do
     it "renders the client.rb with an encrypted_data_bag_secret entry" do
       expect(knife).to receive(:encryption_secret_provided_ignore_encrypt_flag?).and_return(true)
       expect(knife).to receive(:read_secret).and_return(secret)
-      expect(rendered_template).to match(%r{encrypted_data_bag_secret\s*"/etc/chef/encrypted_data_bag_secret"})
+      expect(rendered_template).to match(%r{encrypted_data_bag_secret\s*"#{Chef::Dist::CONF_DIR}/encrypted_data_bag_secret"})
     end
 
   end
@@ -490,7 +491,7 @@ describe Chef::Knife::Bootstrap do
     end
 
     it "creates /etc/chef/trusted_certs" do
-      expect(rendered_template).to match(%r{mkdir -p /etc/chef/trusted_certs})
+      expect(rendered_template).to match(%r{mkdir -p #{Chef::Dist::CONF_DIR}/trusted_certs})
     end
 
     it "copies the certificates in the directory" do
@@ -499,14 +500,14 @@ describe Chef::Knife::Bootstrap do
       end
 
       certificates.each do |cert|
-        expect(rendered_template).to match(%r{cat > /etc/chef/trusted_certs/#{File.basename(cert)} <<'EOP'})
+        expect(rendered_template).to match(%r{cat > #{Chef::Dist::CONF_DIR}/trusted_certs/#{File.basename(cert)} <<'EOP'})
       end
     end
 
     context "when :trusted_cets_dir is empty" do
       let(:trusted_certs_dir) { Chef::Util::PathHelper.cleanpath(File.join(File.dirname(__FILE__), "../../data/trusted_certs_empty")) }
       it "doesn't create /etc/chef/trusted_certs if :trusted_certs_dir is empty" do
-        expect(rendered_template).not_to match(%r{mkdir -p /etc/chef/trusted_certs})
+        expect(rendered_template).not_to match(%r{mkdir -p #{Chef::Dist::CONF_DIR}/trusted_certs})
       end
     end
 
@@ -563,7 +564,7 @@ describe Chef::Knife::Bootstrap do
       let(:client_d_dir) { nil }
 
       it "does not create /etc/chef/client.d" do
-        expect(rendered_template).not_to match(%r{mkdir -p /etc/chef/client\.d})
+        expect(rendered_template).not_to match(%r{mkdir -p #{Chef::Dist::CONF_DIR}/client\.d})
       end
     end
 
@@ -575,21 +576,21 @@ describe Chef::Knife::Bootstrap do
       end
 
       it "creates /etc/chef/client.d" do
-        expect(rendered_template).to match("mkdir -p /etc/chef/client\.d")
+        expect(rendered_template).to match("mkdir -p #{Chef::Dist::CONF_DIR}/client\.d")
       end
 
       context "a flat directory structure" do
         it "escapes single-quotes" do
-          expect(rendered_template).to match("cat > /etc/chef/client.d/02-strings.rb <<'EOP'")
+          expect(rendered_template).to match("cat > #{Chef::Dist::CONF_DIR}/client.d/02-strings.rb <<'EOP'")
           expect(rendered_template).to match("something '\\\\''/foo/bar'\\\\''")
         end
 
         it "creates a file 00-foo.rb" do
-          expect(rendered_template).to match("cat > /etc/chef/client.d/00-foo.rb <<'EOP'")
+          expect(rendered_template).to match("cat > #{Chef::Dist::CONF_DIR}/client.d/00-foo.rb <<'EOP'")
           expect(rendered_template).to match("d6f9b976-289c-4149-baf7-81e6ffecf228")
         end
         it "creates a file bar" do
-          expect(rendered_template).to match("cat > /etc/chef/client.d/bar <<'EOP'")
+          expect(rendered_template).to match("cat > #{Chef::Dist::CONF_DIR}/client.d/bar <<'EOP'")
           expect(rendered_template).to match("1 / 0")
         end
       end
@@ -601,7 +602,7 @@ describe Chef::Knife::Bootstrap do
           )
         end
         it "creates a file foo/bar.rb" do
-          expect(rendered_template).to match("cat > /etc/chef/client.d/foo/bar.rb <<'EOP'")
+          expect(rendered_template).to match("cat > #{Chef::Dist::CONF_DIR}/client.d/foo/bar.rb <<'EOP'")
           expect(rendered_template).to match("1 / 0")
         end
       end
@@ -2009,7 +2010,7 @@ describe Chef::Knife::Bootstrap do
     context "under Windows" do
       let(:windows_test) { true }
       it "is windows-chef-client-msi" do
-        expect(knife.default_bootstrap_template).to eq "windows-chef-client-msi"
+        expect(knife.default_bootstrap_template).to eq "windows-#{Chef::Dist::CLIENT}-msi"
       end
 
     end

@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+require "chef/dist"
 require "spec_helper"
 
 describe Chef::Provider::Service::Windows, "load_current_resource", :windows_only do
@@ -24,7 +25,7 @@ describe Chef::Provider::Service::Windows, "load_current_resource", :windows_onl
 
   let(:logger) { double("Mixlib::Log::Child").as_null_object }
 
-  let(:chef_service_name) { "chef-client" }
+  let(:chef_service_name) { Chef::Dist::CLIENT }
   let(:new_resource) { Chef::Resource::WindowsService.new(chef_service_name) }
 
   # Actual response from Win32::Service.config_info('chef-client')
