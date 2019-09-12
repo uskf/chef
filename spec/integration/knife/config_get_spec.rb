@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "support/shared/integration/integration_helper"
 require "support/shared/context/config"
 
@@ -69,114 +70,114 @@ describe "knife config get", :workstation do
   end
 
   context "with a global knife.rb" do
-    before { file(".chef/knife.rb", "node_name 'one'\n") }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/knife.rb", "node_name 'one'\n") }
 
-    it { is_expected.to match(%r{^Loading from configuration file .*/#{File.basename(path_to("."))}/.chef/knife.rb$}) }
+    it { is_expected.to match(%r{^Loading from configuration file .*/#{File.basename(path_to("."))}/#{Chef::Dist::USER_CONF_DIR}/knife.rb$}) }
     it { is_expected.to match(/^node_name:\s+one$/) }
   end
 
   context "with a repo knife.rb" do
-    before { file("repo/.chef/knife.rb", "node_name 'two'\n") }
+    before { file("repo/#{Chef::Dist::USER_CONF_DIR}/knife.rb", "node_name 'two'\n") }
 
-    it { is_expected.to match(%r{^Loading from configuration file .*/#{File.basename(path_to("."))}/repo/.chef/knife.rb$}) }
+    it { is_expected.to match(%r{^Loading from configuration file .*/#{File.basename(path_to("."))}/repo/#{Chef::Dist::USER_CONF_DIR}/knife.rb$}) }
     it { is_expected.to match(/^node_name:\s+two$/) }
   end
 
   context "with both knife.rb" do
     before do
-      file(".chef/knife.rb", "node_name 'one'\n")
-      file("repo/.chef/knife.rb", "node_name 'two'\n")
+      file("#{Chef::Dist::USER_CONF_DIR}/knife.rb", "node_name 'one'\n")
+      file("repo/#{Chef::Dist::USER_CONF_DIR}/knife.rb", "node_name 'two'\n")
     end
 
-    it { is_expected.to match(%r{^Loading from configuration file .*/#{File.basename(path_to("."))}/repo/.chef/knife.rb$}) }
+    it { is_expected.to match(%r{^Loading from configuration file .*/#{File.basename(path_to("."))}/repo/#{Chef::Dist::USER_CONF_DIR}/knife.rb$}) }
     it { is_expected.to match(/^node_name:\s+two$/) }
   end
 
   context "with a credentials file" do
-    before { file(".chef/credentials", "[default]\nclient_name = \"three\"\n") }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"three\"\n") }
 
-    it { is_expected.to match(%r{^Loading from credentials file .*/#{File.basename(path_to("."))}/.chef/credentials$}) }
+    it { is_expected.to match(%r{^Loading from credentials file .*/#{File.basename(path_to("."))}/#{Chef::Dist::USER_CONF_DIR}/credentials$}) }
     it { is_expected.to match(/^node_name:\s+three$/) }
   end
 
   context "with a credentials file and knife.rb" do
     before do
-      file(".chef/knife.rb", "node_name 'one'\n")
-      file(".chef/credentials", "[default]\nclient_name = \"three\"\n")
+      file("#{Chef::Dist::USER_CONF_DIR}/knife.rb", "node_name 'one'\n")
+      file("#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"three\"\n")
     end
 
-    it { is_expected.to match(%r{^Loading from configuration file .*/#{File.basename(path_to("."))}/.chef/knife.rb$}) }
-    it { is_expected.to match(%r{^Loading from credentials file .*/#{File.basename(path_to("."))}/.chef/credentials$}) }
+    it { is_expected.to match(%r{^Loading from configuration file .*/#{File.basename(path_to("."))}/#{Chef::Dist::USER_CONF_DIR}/knife.rb$}) }
+    it { is_expected.to match(%r{^Loading from credentials file .*/#{File.basename(path_to("."))}/#{Chef::Dist::USER_CONF_DIR}/credentials$}) }
     it { is_expected.to match(/^node_name:\s+one$/) }
   end
 
   context "with a credentials file and CHEF_HOME" do
     before do
-      file(".chef/credentials", "[default]\nclient_name = \"three\"\n")
-      file("foo/.chef/credentials", "[default]\nclient_name = \"four\"\n")
+      file("#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"three\"\n")
+      file("foo/#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"four\"\n")
       ENV["CHEF_HOME"] = path_to("foo")
     end
 
-    it { is_expected.to match(%r{^Loading from credentials file .*/#{File.basename(path_to("."))}/foo/.chef/credentials$}) }
+    it { is_expected.to match(%r{^Loading from credentials file .*/#{File.basename(path_to("."))}/foo/#{Chef::Dist::USER_CONF_DIR}/credentials$}) }
     it { is_expected.to match(/^node_name:\s+four$/) }
   end
 
   context "with a credentials file and KNIFE_HOME" do
     before do
-      file(".chef/credentials", "[default]\nclient_name = \"three\"\n")
-      file("bar/.chef/credentials", "[default]\nclient_name = \"four\"\n")
+      file("#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"three\"\n")
+      file("bar/#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"four\"\n")
       ENV["KNIFE_HOME"] = path_to("bar")
     end
 
-    it { is_expected.to match(%r{^Loading from credentials file .*/#{File.basename(path_to("."))}/bar/.chef/credentials$}) }
+    it { is_expected.to match(%r{^Loading from credentials file .*/#{File.basename(path_to("."))}/bar/#{Chef::Dist::USER_CONF_DIR}/credentials$}) }
     it { is_expected.to match(/^node_name:\s+four$/) }
   end
 
   context "with single argument" do
     let(:cmd_args) { %w{node_name} }
-    before { file(".chef/credentials", "[default]\nclient_name = \"three\"\n") }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"three\"\n") }
 
     it { is_expected.to match(/^node_name:\s+three\Z/) }
   end
 
   context "with two arguments" do
     let(:cmd_args) { %w{node_name client_key} }
-    before { file(".chef/credentials", "[default]\nclient_name = \"three\"\nclient_key = \"three.pem\"") }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"three\"\nclient_key = \"three.pem\"") }
 
-    it { is_expected.to match(%r{^client_key:\s+\S*/.chef/three.pem\nnode_name:\s+three\Z}) }
+    it { is_expected.to match(%r{^client_key:\s+\S*/#{Chef::Dist::USER_CONF_DIR}/three.pem\nnode_name:\s+three\Z}) }
   end
 
   context "with a dotted argument" do
     let(:cmd_args) { %w{knife.ssh_user} }
-    before { file(".chef/credentials", "[default]\nclient_name = \"three\"\n[default.knife]\nssh_user = \"foo\"\n") }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"three\"\n[default.knife]\nssh_user = \"foo\"\n") }
 
     it { is_expected.to match(/^knife.ssh_user:\s+foo\Z/) }
   end
 
   context "with regex argument" do
     let(:cmd_args) { %w{/name/} }
-    before { file(".chef/credentials", "[default]\nclient_name = \"three\"\n") }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"three\"\n") }
 
     it { is_expected.to match(/^node_name:\s+three\Z/) }
   end
 
   context "with --all" do
     let(:cmd_args) { %w{-a /key_contents/} }
-    before { file(".chef/credentials", "[default]\nclient_name = \"three\"\n") }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"three\"\n") }
 
     it { is_expected.to match(/^client_key_contents:\s+\nvalidation_key_contents:\s+\Z/) }
   end
 
   context "with --raw" do
     let(:cmd_args) { %w{-r node_name} }
-    before { file(".chef/credentials", "[default]\nclient_name = \"three\"\n") }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"three\"\n") }
 
     it { is_expected.to eq("three\n") }
   end
 
   context "with --format=json" do
     let(:cmd_args) { %w{--format=json node_name} }
-    before { file(".chef/credentials", "[default]\nclient_name = \"three\"\n") }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", "[default]\nclient_name = \"three\"\n") }
 
     it { expect(JSON.parse(subject)).to eq({ "node_name" => "three" }) }
   end

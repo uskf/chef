@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "support/shared/integration/integration_helper"
 require "support/shared/context/config"
 
@@ -63,31 +64,31 @@ describe "knife config list-profiles", :workstation do
 
   context "with no credentials file" do
     subject { knife_list_profiles.stderr }
-    it { is_expected.to eq "FATAL: No profiles found, #{path_to(".chef/credentials")} does not exist or is empty\n" }
+    it { is_expected.to eq "FATAL: No profiles found, #{path_to(Chef::Dist::USER_CONF_DIR+"/credentials")} does not exist or is empty\n" }
   end
 
   context "with an empty credentials file" do
-    before { file(".chef/credentials", "") }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", "") }
     subject { knife_list_profiles.stderr }
-    it { is_expected.to eq "FATAL: No profiles found, #{path_to(".chef/credentials")} does not exist or is empty\n" }
+    it { is_expected.to eq "FATAL: No profiles found, #{path_to(Chef::Dist::USER_CONF_DIR+"/credentials")} does not exist or is empty\n" }
   end
 
   context "with a simple default profile" do
-    before { file(".chef/credentials", <<~EOH) }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", <<~EOH) }
       [default]
       client_name = "testuser"
       client_key = "testkey.pem"
       chef_server_url = "https://example.com/organizations/testorg"
     EOH
-    it { is_expected.to eq <<~EOH.delete("#") }
-       Profile  Client    Key                  Server                                   #
-      ----------------------------------------------------------------------------------#
-      *default  testuser  ~/.chef/testkey.pem  https://example.com/organizations/testorg#
+    it { is_expected.to eq <<~EOH.delete("#").sub("%", Chef::Dist::USER_CONF_DIR.gsub(/./, ' ')).sub("=", Chef::Dist::USER_CONF_DIR.gsub(/./, '-')) }
+       Profile  Client    Key%             Server                                   #
+      -----------------------=------------------------------------------------------#
+      *default  testuser  ~/#{Chef::Dist::USER_CONF_DIR}/testkey.pem  https://example.com/organizations/testorg#
     EOH
   end
 
   context "with multiple profiles" do
-    before { file(".chef/credentials", <<~EOH) }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", <<~EOH) }
       [default]
       client_name = "testuser"
       client_key = "testkey.pem"
@@ -103,18 +104,18 @@ describe "knife config list-profiles", :workstation do
       client_key = "~/src/qauser.pem"
       chef_server_url = "https://example.com/organizations/testorg"
     EOH
-    it { is_expected.to eq <<~EOH.delete("#") }
-       Profile  Client    Key                  Server                                   #
-      ----------------------------------------------------------------------------------#
-      *default  testuser  ~/.chef/testkey.pem  https://example.com/organizations/testorg#
-       prod     testuser  ~/.chef/testkey.pem  https://example.com/organizations/prod   #
-       qa       qauser    ~/src/qauser.pem     https://example.com/organizations/testorg#
+    it { is_expected.to eq <<~EOH.delete("#").gsub("%", Chef::Dist::USER_CONF_DIR.gsub(/./, ' ')).sub("=", Chef::Dist::USER_CONF_DIR.gsub(/./, '-')) }
+       Profile  Client    Key%             Server                                   #
+      -----------------------=------------------------------------------------------#
+      *default  testuser  ~/#{Chef::Dist::USER_CONF_DIR}/testkey.pem  https://example.com/organizations/testorg#
+       prod     testuser  ~/#{Chef::Dist::USER_CONF_DIR}/testkey.pem  https://example.com/organizations/prod   #
+       qa       qauser    ~/src/qauser.pem%https://example.com/organizations/testorg#
     EOH
   end
 
   context "with a non-default active profile" do
     let(:cmd_args) { %w{--profile prod} }
-    before { file(".chef/credentials", <<~EOH) }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", <<~EOH) }
       [default]
       client_name = "testuser"
       client_key = "testkey.pem"
@@ -130,17 +131,17 @@ describe "knife config list-profiles", :workstation do
       client_key = "~/src/qauser.pem"
       chef_server_url = "https://example.com/organizations/testorg"
     EOH
-    it { is_expected.to eq <<~EOH.delete("#") }
-       Profile  Client    Key                  Server                                   #
-      ----------------------------------------------------------------------------------#
-       default  testuser  ~/.chef/testkey.pem  https://example.com/organizations/testorg#
-      *prod     testuser  ~/.chef/testkey.pem  https://example.com/organizations/prod   #
-       qa       qauser    ~/src/qauser.pem     https://example.com/organizations/testorg#
+    it { is_expected.to eq <<~EOH.delete("#").gsub("%", Chef::Dist::USER_CONF_DIR.gsub(/./, ' ')).sub("=", Chef::Dist::USER_CONF_DIR.gsub(/./, '-')) }
+       Profile  Client    Key%             Server                                   #
+      -----------------------=------------------------------------------------------#
+       default  testuser  ~/#{Chef::Dist::USER_CONF_DIR}/testkey.pem  https://example.com/organizations/testorg#
+      *prod     testuser  ~/#{Chef::Dist::USER_CONF_DIR}/testkey.pem  https://example.com/organizations/prod   #
+       qa       qauser    ~/src/qauser.pem%https://example.com/organizations/testorg#
     EOH
   end
 
   context "with a minimal profile" do
-    before { file(".chef/credentials", <<~EOH) }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", <<~EOH) }
       [default]
       chef_server_url = "https://example.com/organizations/testorg"
     EOH
@@ -149,7 +150,7 @@ describe "knife config list-profiles", :workstation do
 
   context "with -i" do
     let(:cmd_args) { %w{-i} }
-    before { file(".chef/credentials", <<~EOH) }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", <<~EOH) }
       [default]
       chef_server_url = "https://example.com/organizations/testorg"
     EOH
@@ -162,7 +163,7 @@ describe "knife config list-profiles", :workstation do
 
   context "with --format=json" do
     let(:cmd_args) { %w{--format=json node_name} }
-    before { file(".chef/credentials", <<~EOH) }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/credentials", <<~EOH) }
       [default]
       client_name = "testuser"
       client_key = "testkey.pem"
@@ -180,8 +181,8 @@ describe "knife config list-profiles", :workstation do
     EOH
     it {
       expect(JSON.parse(subject)).to eq [
-      { "profile" => "default", "active" => true, "client_name" => "testuser", "client_key" => path_to(".chef/testkey.pem"), "server_url" => "https://example.com/organizations/testorg" },
-      { "profile" => "prod", "active" => false, "client_name" => "testuser", "client_key" => path_to(".chef/testkey.pem"), "server_url" => "https://example.com/organizations/prod" },
+      { "profile" => "default", "active" => true, "client_name" => "testuser", "client_key" => path_to("#{Chef::Dist::USER_CONF_DIR}/testkey.pem"), "server_url" => "https://example.com/organizations/testorg" },
+      { "profile" => "prod", "active" => false, "client_name" => "testuser", "client_key" => path_to("#{Chef::Dist::USER_CONF_DIR}/testkey.pem"), "server_url" => "https://example.com/organizations/prod" },
       { "profile" => "qa", "active" => false, "client_name" => "qauser", "client_key" => path_to("src/qauser.pem"), "server_url" => "https://example.com/organizations/testorg" },
     ]
     }

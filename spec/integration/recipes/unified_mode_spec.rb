@@ -1,5 +1,6 @@
 require "support/shared/integration/integration_helper"
 require "chef/mixin/shell_out"
+require "chef/dist"
 
 describe "Unified Mode" do
   include IntegrationSupport
@@ -7,7 +8,7 @@ describe "Unified Mode" do
 
   let(:chef_dir) { File.expand_path("../../../../bin", __FILE__) }
 
-  let(:chef_client) { "bundle exec chef-client --minimal-ohai" }
+  let(:chef_client) { "bundle exec #{Chef::Dist::CLIENT} --minimal-ohai" }
 
   when_the_repository "has a cookbook with a unified_mode resource with a delayed notification from the second block to the first block" do
     before do

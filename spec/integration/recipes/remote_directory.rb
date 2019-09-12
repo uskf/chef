@@ -1,3 +1,4 @@
+require "chef/dist"
 require "support/shared/integration/integration_helper"
 
 describe Chef::Resource::RemoteDirectory do
@@ -16,7 +17,7 @@ describe Chef::Resource::RemoteDirectory do
   # machine that has omnibus chef installed. In that case we need to ensure
   # we're running `chef-client` from the source tree and not the external one.
   # cf. CHEF-4914
-  let(:chef_client) { "bundle exec chef-client --minimal-ohai" }
+  let(:chef_client) { "bundle exec #{Chef::Dist::CLIENT} --minimal-ohai" }
 
   when_the_repository "has a cookbook with a source_dir with two subdirectories, each with one file and subdir in a different alphabetical order" do
     before do

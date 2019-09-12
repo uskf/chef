@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "chef/config"
 require "chef/knife"
 require "chef/application/knife"
@@ -86,7 +87,7 @@ module KnifeSupport
         # To ensure that we don't pick up a user's credentials file we lie through our teeth about
         # it's existence.
         allow(File).to receive(:file?).and_call_original
-        allow(File).to receive(:file?).with(File.expand_path("~/.chef/credentials")).and_return(false)
+        allow(File).to receive(:file?).with(File.expand_path("~/#{Chef::Dist::USER_CONF_DIR}/credentials")).and_return(false)
 
         # Set a canary that is modified by the default null_config.rb config file.
         $__KNIFE_INTEGRATION_FAILSAFE_CHECK = "ole"

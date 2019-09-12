@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "support/shared/integration/integration_helper"
 require "support/shared/context/config"
 
@@ -88,13 +89,13 @@ describe "knife config get-profile", :workstation do
   end
 
   context "with a context file" do
-    before { file(".chef/context", "development\n") }
+    before { file("#{Chef::Dist::USER_CONF_DIR}/context", "development\n") }
     it { is_expected.to eq "development\n" }
   end
 
   context "with a context file under $CHEF_HOME" do
     before do
-      file("chefhome/.chef/context", "other\n")
+      file("chefhome/#{Chef::Dist::USER_CONF_DIR}/context", "other\n")
       ENV["CHEF_HOME"] = path_to("chefhome")
     end
 
@@ -103,7 +104,7 @@ describe "knife config get-profile", :workstation do
 
   context "with a context file under $KNIFE_HOME" do
     before do
-      file("knifehome/.chef/context", "other\n")
+      file("knifehome/#{Chef::Dist::USER_CONF_DIR}/context", "other\n")
       ENV["KNIFE_HOME"] = path_to("knifehome")
     end
 

@@ -1,3 +1,4 @@
+require "chef/dist"
 require "spec_helper"
 require "chef/config_fetcher"
 
@@ -12,7 +13,7 @@ describe Chef::ConfigFetcher do
   let(:fetcher) { Chef::ConfigFetcher.new(config_location) }
 
   context "when loading a local file" do
-    let(:config_location) { "/etc/chef/client.rb" }
+    let(:config_location) { "#{Chef::Dist::CONF_DIR}/client.rb" }
     let(:config_content) { "# The client.rb content" }
 
     it "reads the file from disk" do
@@ -39,7 +40,7 @@ describe Chef::ConfigFetcher do
 
     context "and consuming JSON" do
 
-      let(:config_location) { "/etc/chef/first-boot.json" }
+      let(:config_location) { "#{Chef::Dist::CONF_DIR}/first-boot.json" }
 
       it "returns the parsed JSON" do
         expect(::File).to receive(:read)

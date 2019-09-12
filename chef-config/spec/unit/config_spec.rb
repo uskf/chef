@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+require "chef/dist"
 require "spec_helper"
 require "chef-config/config"
 
@@ -251,17 +252,17 @@ RSpec.describe ChefConfig::Config do
         let(:system_drive) { ChefConfig::Config.env["SYSTEMDRIVE"] } if is_windows
         let :primary_cache_path do
           if is_windows
-            "#{system_drive}\\chef"
+            "#{system_drive}\\#{Chef::Dist::EXEC}"
           else
-            "/var/chef"
+            "/var/#{Chef::Dist::EXEC}"
           end
         end
 
         let :secondary_cache_path do
           if is_windows
-            "#{ChefConfig::Config[:user_home]}\\.chef"
+            "#{ChefConfig::Config[:user_home]}\\#{Chef::Dist::USER_CONF_DIR}"
           else
-            "#{ChefConfig::Config[:user_home]}/.chef"
+            "#{ChefConfig::Config[:user_home]}/#{Chef::Dist::USER_CONF_DIR}"
           end
         end
 
@@ -412,7 +413,7 @@ RSpec.describe ChefConfig::Config do
 
           context "when /var/chef exists and is accessible" do
             before do
-              allow(ChefConfig::Config).to receive(:path_accessible?).with(to_platform("/var/chef")).and_return(true)
+              allow(ChefConfig::Config).to receive(:path_accessible?).with(to_platform("/var/#{Chef::Dist::EXEC}")).and_return(true)
             end
 
             it "defaults to /var/chef" do
@@ -430,7 +431,7 @@ RSpec.describe ChefConfig::Config do
 
           context "when /var/chef does not exist and /var is accessible" do
             it "defaults to /var/chef" do
-              allow(File).to receive(:exists?).with(to_platform("/var/chef")).and_return(false)
+              allow(File).to receive(:exists?).with(to_platform("/var/#{Chef::Dist::EXEC}")).and_return(false)
               allow(ChefConfig::Config).to receive(:path_accessible?).with(to_platform("/var")).and_return(true)
               expect(ChefConfig::Config[:cache_path]).to eq(primary_cache_path)
             end
@@ -438,7 +439,7 @@ RSpec.describe ChefConfig::Config do
 
           context "when /var/chef does not exist and /var is not accessible" do
             it "defaults to $HOME/.chef" do
-              allow(File).to receive(:exists?).with(to_platform("/var/chef")).and_return(false)
+              allow(File).to receive(:exists?).with(to_platform("/var/#{Chef::Dist::EXEC}")).and_return(false)
               allow(ChefConfig::Config).to receive(:path_accessible?).with(to_platform("/var")).and_return(false)
               expect(ChefConfig::Config[:cache_path]).to eq(secondary_cache_path)
             end
@@ -446,9 +447,9 @@ RSpec.describe ChefConfig::Config do
 
           context "when /var/chef exists and is not accessible" do
             before do
-              allow(File).to receive(:exists?).with(to_platform("/var/chef")).and_return(true)
-              allow(File).to receive(:readable?).with(to_platform("/var/chef")).and_return(true)
-              allow(File).to receive(:writable?).with(to_platform("/var/chef")).and_return(false)
+              allow(File).to receive(:exists?).with(to_platform("/var/#{Chef::Dist::EXEC}")).and_return(true)
+              allow(File).to receive(:readable?).with(to_platform("/var/#{Chef::Dist::EXEC}")).and_return(true)
+              allow(File).to receive(:writable?).with(to_platform("/var/#{Chef::Dist::EXEC}")).and_return(false)
             end
 
             it "defaults to $HOME/.chef" do
@@ -704,7 +705,7 @@ RSpec.describe ChefConfig::Config do
             end
 
             it "config_dir is /home/charlie/.chef/" do
-              expect(ChefConfig::Config.config_dir).to eq(ChefConfig::PathHelper.join(ChefConfig::PathHelper.cleanpath("/home/charlie/"), ".chef", ""))
+              expect(ChefConfig::Config.config_dir).to eq(ChefConfig::PathHelper.join(ChefConfig::PathHelper.cleanpath("/home/charlie/"), Chef::Dist::USER_CONF_DIR, ""))
             end
 
             context "and chef is running in local mode" do
@@ -713,7 +714,7 @@ RSpec.describe ChefConfig::Config do
               end
 
               it "config_dir is /home/charlie/.chef/" do
-                expect(ChefConfig::Config.config_dir).to eq(ChefConfig::PathHelper.join(ChefConfig::PathHelper.cleanpath("/home/charlie/"), ".chef", ""))
+                expect(ChefConfig::Config.config_dir).to eq(ChefConfig::PathHelper.join(ChefConfig::PathHelper.cleanpath("/home/charlie/"), Chef::Dist::USER_CONF_DIR, ""))
               end
             end
           end
@@ -725,7 +726,7 @@ RSpec.describe ChefConfig::Config do
               end
 
               it "config_dir is with backslashes" do
-                expect(ChefConfig::Config.config_dir).to eq(ChefConfig::PathHelper.join(ChefConfig::PathHelper.cleanpath("/home/charlie/"), ".chef", ""))
+                expect(ChefConfig::Config.config_dir).to eq(ChefConfig::PathHelper.join(ChefConfig::PathHelper.cleanpath("/home/charlie/"), Chef::Dist::USER_CONF_DIR, ""))
               end
 
               context "and chef is running in local mode" do
@@ -734,7 +735,7 @@ RSpec.describe ChefConfig::Config do
                 end
 
                 it "config_dir is with backslashes" do
-                  expect(ChefConfig::Config.config_dir).to eq(ChefConfig::PathHelper.join(ChefConfig::PathHelper.cleanpath("/home/charlie/"), ".chef", ""))
+                  expect(ChefConfig::Config.config_dir).to eq(ChefConfig::PathHelper.join(ChefConfig::PathHelper.cleanpath("/home/charlie/"), Chef::Dist::USER_CONF_DIR, ""))
                 end
               end
             end

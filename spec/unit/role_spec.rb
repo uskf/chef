@@ -18,6 +18,7 @@
 
 require "spec_helper"
 require "chef/role"
+require "chef/dist"
 
 describe Chef::Role do
   before(:each) do
@@ -252,7 +253,7 @@ describe Chef::Role do
 
   describe "when loading from disk" do
     before do
-      default_cache_path = windows? ? 'C:\chef' : "/var/chef"
+      default_cache_path = windows? ? 'C:\\'+Chef::Dist::EXEC : "/var/#{Chef::Dist::EXEC}"
       allow(Chef::Config).to receive(:cache_path).and_return(default_cache_path)
     end
 

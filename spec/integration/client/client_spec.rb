@@ -93,7 +93,7 @@ describe "chef-client" do
     end
 
     context "and a config file under .chef/knife.rb" do
-      before { file ".chef/knife.rb", "xxx.xxx" }
+      before { file "#{Chef::Dist::USER_CONF_DIR}/knife.rb", "xxx.xxx" }
 
       it "should load .chef/knife.rb when -z is specified" do
         result = shell_out("#{chef_client} -z -o 'x::default'", cwd: path_to(""))

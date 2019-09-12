@@ -18,6 +18,7 @@
 #
 
 require_relative "../knife"
+require_relative "../dist"
 
 class Chef
   class Knife
@@ -42,7 +43,7 @@ class Chef
           # Some of this is a bit hacky since it duplicates
           wcl = self.class.config_loader
           if wcl.credentials_found
-            loading_from("credentials", ChefConfig::PathHelper.home(".chef", "credentials"))
+            loading_from("credentials", ChefConfig::PathHelper.home(Chef::Dist::USER_CONF_DIR, "credentials"))
           end
           if wcl.config_location
             loading_from("configuration", wcl.config_location)

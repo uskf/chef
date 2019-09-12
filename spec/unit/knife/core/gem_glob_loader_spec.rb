@@ -15,12 +15,13 @@
 # limitations under the License.
 #
 
+require "chef/dist"
 require "spec_helper"
 
 describe Chef::Knife::SubcommandLoader::GemGlobLoader do
   let(:loader) { Chef::Knife::SubcommandLoader::GemGlobLoader.new(File.join(CHEF_SPEC_DATA, "knife-site-subcommands")) }
   let(:home) { File.join(CHEF_SPEC_DATA, "knife-home") }
-  let(:plugin_dir) { File.join(home, ".chef", "plugins", "knife") }
+  let(:plugin_dir) { File.join(home, Chef::Dist::USER_CONF_DIR, "plugins", "knife") }
 
   before do
     allow(ChefConfig).to receive(:windows?) { false }
@@ -69,7 +70,10 @@ describe Chef::Knife::SubcommandLoader::GemGlobLoader do
   end
 
   it "finds user-specific subcommands in the user's ~/.chef directory" do
-    expected_command = File.join(home, ".chef", "plugins", "knife", "example_home_subcommand.rb")
+    if Chef::Dist::USER_CONF_DIR != ".chef" && ! File.symlink?(File.join(home, Chef::Dist::USER_CONF_DIR))
+      File.symlink(File.join(home, ".chef"), File.join(home, Chef::Dist::USER_CONF_DIR))
+    end
+    expected_command = File.join(home, Chef::Dist::USER_CONF_DIR, "plugins", "knife", "example_home_subcommand.rb")
     expect(loader.site_subcommands).to include(expected_command)
   end
 
@@ -170,7 +174,7 @@ describe Chef::Knife::SubcommandLoader::GemGlobLoader do
 
   describe "finding 3rd party plugins" do
     let(:env_home) { "/home/alice" }
-    let(:manifest_path) { env_home + "/.chef/plugin_manifest.json" }
+    let(:manifest_path) { env_home + "/#{Chef::Dist::USER_CONF_DIR}/plugin_manifest.json" }
 
     before do
       env_dup = ENV.to_hash

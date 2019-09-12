@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+require_relative "../dist"
 require_relative "../version"
 
 class Chef
@@ -67,7 +68,7 @@ class Chef
       end
 
       def error_context_info
-        context_info = { chef_version: Chef::VERSION }
+        context_info = { "#{Chef::Dist::EXEC}_version": Chef::VERSION }
         if Chef.node
           context_info[:platform] = Chef.node["platform"]
           context_info[:platform_version] = Chef.node["platform_version"]

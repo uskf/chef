@@ -25,7 +25,7 @@ describe "Chef Versions" do
   include Chef::Mixin::ShellOut
   let(:chef_dir) { File.join(File.dirname(__FILE__), "..", "..") }
 
-  binaries = [ Chef::Dist::CLIENT, "chef-shell", "chef-apply", "knife", Chef::Dist::SOLOEXEC ]
+  binaries = [ Chef::Dist::CLIENT, Chef::Dist::SHELL, "#{Chef::Dist::EXEC}-apply", "knife", Chef::Dist::SOLOEXEC ]
 
   binaries.each do |binary|
     it "#{binary} version should be sane" do

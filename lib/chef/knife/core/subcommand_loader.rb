@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+require_relative "../../dist"
 require_relative "../../version"
 require_relative "../../util/path_helper"
 require_relative "gem_glob_loader"
@@ -72,7 +73,7 @@ class Chef
       end
 
       def self.plugin_manifest_path
-        Chef::Util::PathHelper.home(".chef", "plugin_manifest.json")
+        Chef::Util::PathHelper.home(Chef::Dist::USER_CONF_DIR, "plugin_manifest.json")
       end
 
       def initialize(chef_config_dir)
@@ -173,7 +174,7 @@ class Chef
         end
 
         # finally search ~/.chef/plugins/knife/*.rb
-        Chef::Util::PathHelper.home(".chef", "plugins", "knife") do |p|
+        Chef::Util::PathHelper.home(Chef::Dist::USER_CONF_DIR, "plugins", "knife") do |p|
           user_specific_files.concat Dir.glob(File.join(Chef::Util::PathHelper.escape_glob_dir(p), "*.rb"))
         end
 

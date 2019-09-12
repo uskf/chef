@@ -115,7 +115,7 @@ module Shell
   end
 
   def self.configure_irb
-    irb_conf[:HISTORY_FILE] = Chef::Util::PathHelper.home(".chef", "chef_shell_history")
+    irb_conf[:HISTORY_FILE] = Chef::Util::PathHelper.home(Chef::Dist::USER_CONF_DIR, "chef_shell_history")
     irb_conf[:SAVE_HISTORY] = 1000
 
     irb_conf[:IRB_RC] = lambda do |conf|
@@ -325,7 +325,7 @@ module Shell
     private
 
     def config_file_for_shell_mode(environment)
-      dot_chef_dir = Chef::Util::PathHelper.home(".chef")
+      dot_chef_dir = Chef::Util::PathHelper.home(Chef::Dist::USER_CONF_DIR)
       if config[:config_file]
         config[:config_file]
       elsif environment

@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+require "chef/dist"
 require "spec_helper"
 require "tempfile"
 
@@ -75,22 +76,22 @@ RSpec.describe ChefConfig::WorkstationConfigLoader do
         let(:home) { "/Users/example.user" }
 
         before do
-          allow(ChefConfig::PathHelper).to receive(:home).with(".chef").and_yield(File.join(home, ".chef"))
-          allow(config_loader).to receive(:path_exists?).with("#{home}/.chef/knife.rb").and_return(true)
+          allow(ChefConfig::PathHelper).to receive(:home).with(Chef::Dist::USER_CONF_DIR).and_yield(File.join(home, Chef::Dist::USER_CONF_DIR))
+          allow(config_loader).to receive(:path_exists?).with("#{home}/#{Chef::Dist::USER_CONF_DIR}/knife.rb").and_return(true)
         end
 
         it "uses the config in HOME/.chef/knife.rb" do
-          expect(config_loader.config_location).to eq("#{home}/.chef/knife.rb")
+          expect(config_loader.config_location).to eq("#{home}/#{Chef::Dist::USER_CONF_DIR}/knife.rb")
         end
 
         context "and has a config.rb" do
 
           before do
-            allow(config_loader).to receive(:path_exists?).with("#{home}/.chef/config.rb").and_return(true)
+            allow(config_loader).to receive(:path_exists?).with("#{home}/#{Chef::Dist::USER_CONF_DIR}/config.rb").and_return(true)
           end
 
           it "uses the config in HOME/.chef/config.rb" do
-            expect(config_loader.config_location).to eq("#{home}/.chef/config.rb")
+            expect(config_loader.config_location).to eq("#{home}/#{Chef::Dist::USER_CONF_DIR}/config.rb")
           end
 
           context "and/or a parent dir contains a .chef dir" do
@@ -104,23 +105,23 @@ RSpec.describe ChefConfig::WorkstationConfigLoader do
                 env["PWD"] = env_pwd
               end
 
-              allow(config_loader).to receive(:path_exists?).with("#{env_pwd}/.chef/knife.rb").and_return(true)
-              allow(File).to receive(:exist?).with("#{env_pwd}/.chef").and_return(true)
-              allow(File).to receive(:directory?).with("#{env_pwd}/.chef").and_return(true)
+              allow(config_loader).to receive(:path_exists?).with("#{env_pwd}/#{Chef::Dist::USER_CONF_DIR}/knife.rb").and_return(true)
+              allow(File).to receive(:exist?).with("#{env_pwd}/#{Chef::Dist::USER_CONF_DIR}").and_return(true)
+              allow(File).to receive(:directory?).with("#{env_pwd}/#{Chef::Dist::USER_CONF_DIR}").and_return(true)
             end
 
             it "prefers the config from parent_dir/.chef" do
-              expect(config_loader.config_location).to eq("#{env_pwd}/.chef/knife.rb")
+              expect(config_loader.config_location).to eq("#{env_pwd}/#{Chef::Dist::USER_CONF_DIR}/knife.rb")
             end
 
             context "and the parent dir's .chef dir has a config.rb" do
 
               before do
-                allow(config_loader).to receive(:path_exists?).with("#{env_pwd}/.chef/config.rb").and_return(true)
+                allow(config_loader).to receive(:path_exists?).with("#{env_pwd}/#{Chef::Dist::USER_CONF_DIR}/config.rb").and_return(true)
               end
 
               it "prefers the config from parent_dir/.chef" do
-                expect(config_loader.config_location).to eq("#{env_pwd}/.chef/config.rb")
+                expect(config_loader.config_location).to eq("#{env_pwd}/#{Chef::Dist::USER_CONF_DIR}/config.rb")
               end
 
               context "and/or the current working directory contains a .chef dir" do
@@ -190,13 +191,13 @@ RSpec.describe ChefConfig::WorkstationConfigLoader do
         end
 
         it "loads the config from the non-dereferenced directory path" do
-          expect(File).to receive(:exist?).with("/home/someuser/prod/chef-repo/.chef").and_return(false)
-          expect(File).to receive(:exist?).with("/home/someuser/prod/.chef").and_return(true)
-          expect(File).to receive(:directory?).with("/home/someuser/prod/.chef").and_return(true)
+          expect(File).to receive(:exist?).with("/home/someuser/prod/chef-repo/#{Chef::Dist::USER_CONF_DIR}").and_return(false)
+          expect(File).to receive(:exist?).with("/home/someuser/prod/#{Chef::Dist::USER_CONF_DIR}").and_return(true)
+          expect(File).to receive(:directory?).with("/home/someuser/prod/#{Chef::Dist::USER_CONF_DIR}").and_return(true)
 
-          expect(config_loader).to receive(:path_exists?).with("/home/someuser/prod/.chef/knife.rb").and_return(true)
+          expect(config_loader).to receive(:path_exists?).with("/home/someuser/prod/#{Chef::Dist::USER_CONF_DIR}/knife.rb").and_return(true)
 
-          expect(config_loader.config_location).to eq("/home/someuser/prod/.chef/knife.rb")
+          expect(config_loader.config_location).to eq("/home/someuser/prod/#{Chef::Dist::USER_CONF_DIR}/knife.rb")
         end
       end
     end
@@ -436,13 +437,13 @@ RSpec.describe ChefConfig::WorkstationConfigLoader do
     else
       let(:home) { "/Users/example.user" }
     end
-    let(:credentials_file) { "#{home}/.chef/credentials" }
-    let(:context_file) { "#{home}/.chef/context" }
+    let(:credentials_file) { "#{home}/#{Chef::Dist::USER_CONF_DIR}/credentials" }
+    let(:context_file) { "#{home}/#{Chef::Dist::USER_CONF_DIR}/context" }
 
     before do
-      allow(ChefConfig::PathHelper).to receive(:home).with(".chef").and_return(File.join(home, ".chef"))
-      allow(ChefConfig::PathHelper).to receive(:home).with(".chef", "credentials").and_return(credentials_file)
-      allow(ChefConfig::PathHelper).to receive(:home).with(".chef", "context").and_return(context_file)
+      allow(ChefConfig::PathHelper).to receive(:home).with(Chef::Dist::USER_CONF_DIR).and_return(File.join(home, Chef::Dist::USER_CONF_DIR))
+      allow(ChefConfig::PathHelper).to receive(:home).with(Chef::Dist::USER_CONF_DIR, "credentials").and_return(credentials_file)
+      allow(ChefConfig::PathHelper).to receive(:home).with(Chef::Dist::USER_CONF_DIR, "context").and_return(context_file)
       allow(File).to receive(:file?).with(context_file).and_return false
     end
 
@@ -467,7 +468,7 @@ RSpec.describe ChefConfig::WorkstationConfigLoader do
         it "applies the expected config" do
           expect { config_loader.load_credentials }.not_to raise_error
           expect(ChefConfig::Config.chef_server_url).to eq("https://api.chef.io/organizations/bedrock")
-          expect(ChefConfig::Config.client_key.to_s).to eq("#{home}/.chef/barney_rubble.pem")
+          expect(ChefConfig::Config.client_key.to_s).to eq("#{home}/#{Chef::Dist::USER_CONF_DIR}/barney_rubble.pem")
           expect(ChefConfig::Config.profile.to_s).to eq("default")
           expect(ChefConfig::Config[:invalid_config_option1234]).to eq("foobar")
         end
@@ -481,7 +482,7 @@ RSpec.describe ChefConfig::WorkstationConfigLoader do
             client_key = "barney_rubble.pem"
             chef_server_url = "https://api.chef.io/organizations/bedrock"
             knife = {
-              secret_file = "/home/barney/.chef/encrypted_data_bag_secret.pem"
+              secret_file = "/home/barney/#{Chef::Dist::USER_CONF_DIR}/encrypted_data_bag_secret.pem"
             }
             [default.knife]
             ssh_user = "knife_ssh_user"
@@ -492,9 +493,9 @@ RSpec.describe ChefConfig::WorkstationConfigLoader do
         it "applies the expected knife config" do
           expect { config_loader.load_credentials }.not_to raise_error
           expect(ChefConfig::Config.chef_server_url).to eq("https://api.chef.io/organizations/bedrock")
-          expect(ChefConfig::Config.client_key.to_s).to eq("#{home}/.chef/barney_rubble.pem")
+          expect(ChefConfig::Config.client_key.to_s).to eq("#{home}/#{Chef::Dist::USER_CONF_DIR}/barney_rubble.pem")
           expect(ChefConfig::Config.knife[:ssh_user].to_s).to eq("knife_ssh_user")
-          expect(ChefConfig::Config.knife[:secret_file].to_s).to eq("/home/barney/.chef/encrypted_data_bag_secret.pem")
+          expect(ChefConfig::Config.knife[:secret_file].to_s).to eq("/home/barney/#{Chef::Dist::USER_CONF_DIR}/encrypted_data_bag_secret.pem")
           expect(ChefConfig::Config.profile.to_s).to eq("default")
         end
       end

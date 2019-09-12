@@ -18,6 +18,7 @@
 
 require_relative "../handler"
 require_relative "../resource/directory"
+require_relative "../dist"
 
 class Chef
   class Handler
@@ -27,7 +28,7 @@ class Chef
 
       def initialize(config = {})
         @config = config
-        @config[:path] ||= "/var/chef/reports"
+        @config[:path] ||= "/var/#{Chef::Dist::EXEC}/reports"
       end
 
       def report

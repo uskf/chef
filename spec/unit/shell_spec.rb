@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+require "chef/dist"
 require "spec_helper"
 require "ostruct"
 
@@ -57,7 +58,7 @@ describe Shell do
   describe "configuring IRB" do
     it "configures irb history" do
       Shell.configure_irb
-      expect(Shell.irb_conf[:HISTORY_FILE]).to eq(Chef::Util::PathHelper.home(".chef", "chef_shell_history"))
+      expect(Shell.irb_conf[:HISTORY_FILE]).to eq(Chef::Util::PathHelper.home(Chef::Dist::USER_CONF_DIR, "chef_shell_history"))
       expect(Shell.irb_conf[:SAVE_HISTORY]).to eq(1000)
     end
 
@@ -68,11 +69,11 @@ describe Shell do
       conf.main = Object.new
       conf.main.instance_eval(&ObjectTestHarness)
       Shell.irb_conf[:IRB_RC].call(conf)
-      expect(conf.prompt_c).to      eq("chef > ")
+      expect(conf.prompt_c).to      eq("#{Chef::Dist::EXEC} > ")
       expect(conf.return_format).to eq(" => %s \n")
-      expect(conf.prompt_i).to      eq("chef (#{Chef::VERSION})> ")
-      expect(conf.prompt_n).to      eq("chef ?> ")
-      expect(conf.prompt_s).to      eq("chef%l> ")
+      expect(conf.prompt_i).to      eq("#{Chef::Dist::EXEC} (#{Chef::VERSION})> ")
+      expect(conf.prompt_n).to      eq("#{Chef::Dist::EXEC} ?> ")
+      expect(conf.prompt_s).to      eq("#{Chef::Dist::EXEC}%l> ")
       expect(conf.use_tracer).to    eq(false)
     end
 
@@ -83,10 +84,10 @@ describe Shell do
       events = Chef::EventDispatch::Dispatcher.new
       conf.main = Chef::Recipe.new(nil, nil, Chef::RunContext.new(Chef::Node.new, {}, events))
       Shell.irb_conf[:IRB_RC].call(conf)
-      expect(conf.prompt_c).to      eq("chef:recipe > ")
-      expect(conf.prompt_i).to      eq("chef:recipe (#{Chef::VERSION})> ")
-      expect(conf.prompt_n).to      eq("chef:recipe ?> ")
-      expect(conf.prompt_s).to      eq("chef:recipe%l> ")
+      expect(conf.prompt_c).to      eq("#{Chef::Dist::EXEC}:recipe > ")
+      expect(conf.prompt_i).to      eq("#{Chef::Dist::EXEC}:recipe (#{Chef::VERSION})> ")
+      expect(conf.prompt_n).to      eq("#{Chef::Dist::EXEC}:recipe ?> ")
+      expect(conf.prompt_s).to      eq("#{Chef::Dist::EXEC}:recipe%l> ")
     end
 
     it "has a prompt like ``chef:attributes > '' in attributes/node context" do
@@ -95,10 +96,10 @@ describe Shell do
       conf = OpenStruct.new
       conf.main = Chef::Node.new
       Shell.irb_conf[:IRB_RC].call(conf)
-      expect(conf.prompt_c).to      eq("chef:attributes > ")
-      expect(conf.prompt_i).to      eq("chef:attributes (#{Chef::VERSION})> ")
-      expect(conf.prompt_n).to      eq("chef:attributes ?> ")
-      expect(conf.prompt_s).to      eq("chef:attributes%l> ")
+      expect(conf.prompt_c).to      eq("#{Chef::Dist::EXEC}:attributes > ")
+      expect(conf.prompt_i).to      eq("#{Chef::Dist::EXEC}:attributes (#{Chef::VERSION})> ")
+      expect(conf.prompt_n).to      eq("#{Chef::Dist::EXEC}:attributes ?> ")
+      expect(conf.prompt_s).to      eq("#{Chef::Dist::EXEC}:attributes%l> ")
     end
 
   end

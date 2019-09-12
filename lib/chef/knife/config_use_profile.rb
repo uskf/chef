@@ -18,6 +18,7 @@
 require "fileutils" unless defined?(FileUtils)
 
 require_relative "../knife"
+require_relative "../dist"
 
 class Chef
   class Knife
@@ -31,7 +32,7 @@ class Chef
       end
 
       def run
-        context_file = ChefConfig::PathHelper.home(".chef", "context").freeze
+        context_file = ChefConfig::PathHelper.home(Chef::Dist::USER_CONF_DIR, "context").freeze
         profile = @name_args[0]&.strip
         if profile && !profile.empty?
           # Ensure the .chef/ folder exists.

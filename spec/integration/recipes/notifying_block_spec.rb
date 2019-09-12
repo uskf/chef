@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "chef/dist"
 require "support/shared/integration/integration_helper"
 require "chef/mixin/shell_out"
 
@@ -23,7 +24,7 @@ describe "notifying_block" do
   include Chef::Mixin::ShellOut
 
   let(:chef_dir) { File.expand_path("../../../../bin", __FILE__) }
-  let(:chef_client) { "bundle exec chef-client --minimal-ohai" }
+  let(:chef_client) { "bundle exec #{Chef::Dist::CLIENT} --minimal-ohai" }
 
   when_the_repository "notifying_block test one" do
     before do
