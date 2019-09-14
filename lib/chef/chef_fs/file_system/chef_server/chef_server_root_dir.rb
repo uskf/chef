@@ -17,6 +17,7 @@
 #
 
 require_relative "../../../server_api"
+require_relative "../../../dist"
 require_relative "acls_dir"
 require_relative "../base_fs_dir"
 require_relative "rest_list_dir"
@@ -95,7 +96,7 @@ class Chef
           attr_reader :versioned_cookbooks
 
           def fs_description
-            "Chef server at #{chef_server_url} (user #{chef_username}), repo_mode = #{repo_mode}"
+            "#{Chef::Dist::SERVER_PRODUCT} at #{chef_server_url} (user #{chef_username}), repo_mode = #{repo_mode}"
           end
 
           def rest

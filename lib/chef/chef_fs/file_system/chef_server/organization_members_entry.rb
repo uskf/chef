@@ -1,6 +1,7 @@
 require_relative "rest_list_entry"
 require_relative "../../data_handler/organization_members_data_handler"
 require_relative "../../../json_compat"
+require_relative "../../../dist"
 
 class Chef
   module ChefFS
@@ -47,7 +48,7 @@ class Chef
                 rest.post(api_path, "username" => member)
               rescue Net::HTTPClientException => e
                 if %w{404 405}.include?(e.response.code)
-                  raise "Chef server at #{api_path} does not allow you to directly add members.  Please either upgrade your Chef server or move the users you want into invitations.json instead of members.json."
+                  raise "#{Chef::Dist::SERVER_PRODUCT} at #{api_path} does not allow you to directly add members.  Please either upgrade your #{Chef::Dist::SERVER_PRODUCT} or move the users you want into invitations.json instead of members.json."
                 else
                   raise
                 end

@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+require_relative "../dist"
 
 class Chef
   module Deprecation
@@ -25,7 +26,7 @@ class Chef
       def add_deprecation_warnings_for(method_names)
         method_names.each do |name|
           define_method(name) do |*args|
-            message = "Method '#{name}' of '#{self.class}' is deprecated. It will be removed in Chef #{Chef::VERSION.to_i.next}."
+            message = "Method '#{name}' of '#{self.class}' is deprecated. It will be removed in #{Chef::Dist::EXEC} #{Chef::VERSION.to_i.next}."
             message << " Please update your cookbooks accordingly."
             Chef.deprecated(:internal_api, message)
             super(*args)

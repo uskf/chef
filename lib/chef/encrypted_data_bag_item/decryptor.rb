@@ -25,6 +25,7 @@ require_relative "../encrypted_data_bag_item"
 require_relative "unsupported_encrypted_data_bag_item_format"
 require_relative "decryption_failure"
 require_relative "assertions"
+require_relative "../dist"
 
 class Chef::EncryptedDataBagItem
 
@@ -55,7 +56,7 @@ class Chef::EncryptedDataBagItem
         Version0Decryptor.new(encrypted_value, key)
       else
         raise UnsupportedEncryptedDataBagItemFormat,
-          "This version of chef does not support encrypted data bag item format version '#{format_version}'"
+          "This version of #{Chef::Dist::EXEC} does not support encrypted data bag item format version '#{format_version}'"
       end
     end
 

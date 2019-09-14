@@ -19,6 +19,7 @@
 
 require_relative "config"
 require_relative "run_lock"
+require_relative "dist"
 require "etc" unless defined?(Etc)
 
 class Chef
@@ -52,7 +53,7 @@ class Chef
             Chef::Application.fatal!("There is no fork: #{e.message}")
           end
         else
-          Chef::Application.fatal!("Chef is already running pid #{pid_from_file}")
+          Chef::Application.fatal!("#{Chef::Dist::EXEC} is already running pid #{pid_from_file}")
         end
       end
 

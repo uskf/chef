@@ -193,7 +193,7 @@ class Chef
           configure #{Chef::Dist::PRODUCT} to trust that server's certificate.
 
           By default, the certificate is stored in the following location on the host
-          where your chef-server runs:
+          where your #{Chef::Dist::SERVER_PRODUCT} runs:
 
             /var/opt/opscode/nginx/ca/SERVER_HOSTNAME.crt
 

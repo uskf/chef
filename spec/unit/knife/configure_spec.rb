@@ -42,7 +42,7 @@ describe Chef::Knife::Configure do
 
   it "asks the user for the URL of the chef server" do
     @knife.ask_user_for_config
-    expect(@out.string).to match(Regexp.escape("Please enter the chef server URL: [#{default_server_url}]"))
+    expect(@out.string).to match(Regexp.escape("Please enter the #{Chef::Dist::SERVER_PRODUCT} URL: [#{default_server_url}]"))
     expect(@knife.chef_server).to eq(default_server_url)
   end
 
