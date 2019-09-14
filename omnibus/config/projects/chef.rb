@@ -14,12 +14,11 @@
 # limitations under the License.
 #
 
-name "chef"
-friendly_name "Chef Infra Client"
-maintainer "Chef Software, Inc. <maintainers@chef.io>"
-homepage "https://www.chef.io"
-license "Chef EULA"
-license_file "CHEF-EULA.md"
+name "beaver"
+friendly_name "Beaver Infra Client"
+maintainer "Community <foobar@localhost.localdomain>"
+homepage "https://www.github.com"
+license "Apache License 2.0"
 
 build_iteration 1
 # Do not use __FILE__ after this point, use current_file. If you use __FILE__
@@ -37,6 +36,7 @@ if windows?
   package_name "chef-client"
 else
   install_dir "#{default_root}/#{name}"
+  replace "chef"
 end
 
 override :chef, version: "local_source"

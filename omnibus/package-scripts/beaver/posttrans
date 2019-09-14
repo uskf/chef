@@ -1,0 +1,64 @@
+#!/bin/sh
+# WARNING: REQUIRES /bin/sh
+#
+# - must run on /bin/sh on solaris 9
+# - must run on /bin/sh on AIX 6.x
+# - if you think you are a bash wizard, you probably do not understand
+#   this programming language.  do not touch.
+# - if you are under 40, get peer review from your elders.
+#
+# create symlink
+#
+
+PROGNAME=`basename $0`
+INSTALLER_DIR=/opt/beaver
+CONFIG_DIR=/etc/beaver
+
+error_exit()
+{
+  echo "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2
+  exit 1
+}
+
+is_darwin()
+{
+  uname -v | grep "^Darwin" 2>&1 >/dev/null
+}
+
+is_smartos()
+{
+  uname -v | grep "^joyent" 2>&1 >/dev/null
+}
+
+if is_smartos; then
+    PREFIX="/opt/local"
+elif is_darwin; then
+    PREFIX="/usr/local"
+    mkdir -p "$PREFIX/bin"
+else
+    PREFIX="/usr"
+fi
+
+# rm -f before ln -sf is required for solaris 9
+rm -f $PREFIX/bin/chef-client
+rm -f $PREFIX/bin/chef-solo
+rm -f $PREFIX/bin/chef-apply
+rm -f $PREFIX/bin/chef-shell
+rm -f $PREFIX/bin/knife
+rm -f $PREFIX/bin/ohai
+
+ln -sf $INSTALLER_DIR/bin/beaver-solo $PREFIX/bin/chef-solo || error_exit "Cannot link chef-solo to $PREFIX/bin"
+if [ -f "$INSTALLER_DIR/bin/beaver-apply" ]; then
+  ln -sf $INSTALLER_DIR/bin/beaver-apply $PREFIX/bin/chef-apply || error_exit "Cannot link chef-apply to $PREFIX/bin"
+fi
+if [ -f "$INSTALLER_DIR/bin/beaver-shell" ]; then
+  ln -sf $INSTALLER_DIR/bin/beaver-shell $PREFIX/bin/chef-shell || error_exit "Cannot link chef-shell to $PREFIX/bin"
+fi
+ln -sf $INSTALLER_DIR/bin/knife $PREFIX/bin || error_exit "Cannot link knife to $PREFIX/bin"
+ln -sf $INSTALLER_DIR/bin/ohai $PREFIX/bin || error_exit "Cannot link ohai to $PREFIX/bin"
+
+# We test for the presence of /usr/bin/chef-client to know if this script succeeds, so this
+# must appear as the last real action in the script
+ln -sf $INSTALLER_DIR/bin/beaver-client $PREFIX/bin/chef-client || error_exit "Cannot link chef-client to $PREFIX/bin"
+
+exit 0
