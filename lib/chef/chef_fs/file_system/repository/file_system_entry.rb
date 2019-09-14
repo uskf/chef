@@ -20,6 +20,7 @@ require_relative "../base_fs_dir"
 require_relative "../chef_server/rest_list_dir"
 require_relative "../exceptions"
 require_relative "../../path_utils"
+require_relative "../../../dist"
 require "fileutils" unless defined?(FileUtils)
 
 class Chef
@@ -54,7 +55,7 @@ class Chef
           def chef_object
             data_handler.chef_object(Chef::JSONCompat.parse(read))
           rescue
-            Chef::Log.error("Could not read #{path_for_printing} into a Chef object: #{$!}")
+            Chef::Log.error("Could not read #{path_for_printing} into a #{Chef::Dist::EXEC} object: #{$!}")
             nil
           end
 

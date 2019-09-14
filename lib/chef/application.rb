@@ -343,7 +343,7 @@ class Chef
           exit 0
         end
       end
-      logger.trace "Fork successful. Waiting for new chef pid: #{pid}"
+      logger.trace "Fork successful. Waiting for new #{Chef::Dist::EXEC} pid: #{pid}"
       result = Process.waitpid2(pid)
       handle_child_exit(result)
       logger.trace "Forked instance successfully reaped (pid: #{pid})"
@@ -355,9 +355,9 @@ class Chef
       return true if status.success?
 
       message = if status.signaled?
-                  "Chef run process terminated by signal #{status.termsig} (#{Signal.list.invert[status.termsig]})"
+                  "#{Chef::Dist::EXEC} run process terminated by signal #{status.termsig} (#{Signal.list.invert[status.termsig]})"
                 else
-                  "Chef run process exited unsuccessfully (exit code #{status.exitstatus})"
+                  "#{Chef::Dist::EXEC} run process exited unsuccessfully (exit code #{status.exitstatus})"
                 end
       raise Exceptions::ChildConvergeError, message
     end
