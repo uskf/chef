@@ -26,9 +26,10 @@
 $:.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
 require "chef"
 require "chef/application/windows_service"
+require "chef/dist"
 
 if Chef::Platform.windows?
   Chef::Application::WindowsService.mainloop
 else
-  puts "chef-windows-service is only available on Windows platforms."
+  puts "#{Chef::Dist::EXEC}-windows-service is only available on Windows platforms."
 end
